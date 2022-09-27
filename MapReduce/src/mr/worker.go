@@ -92,11 +92,11 @@ func (w *worker) GetTask() GetTaskReply {
 	if ok := call("Coordinator.Get", w.id, &reply); !ok {
 		os.Exit(0)
 	}
-	if reply.Task == Map {
-		fmt.Printf("Get Map Task, taskid: %v\n", reply.TaskId)
-	} else {
-		fmt.Printf("Get Reduce Task, taskid: %v\n", reply.TaskId)
-	}
+	//if reply.Task == Map {
+	//	fmt.Printf("Get Map Task, taskid: %v\n", reply.TaskId)
+	//} else {
+	//	fmt.Printf("Get Reduce Task, taskid: %v\n", reply.TaskId)
+	//}
 
 	return reply
 }
@@ -156,7 +156,7 @@ func (w *worker) ReduceWorker(reply *GetTaskReply) {
 	var kva []KeyValue
 	for i := 1; i <= reply.MapCount; i++ {
 		filename := fmt.Sprintf("mr-%d-%d", i, reply.TaskId)
-		fmt.Println(curDir + string(os.PathSeparator) + filename)
+		//fmt.Println(curDir + string(os.PathSeparator) + filename)
 		file, err := os.Open(curDir + string(os.PathSeparator) + filename)
 		if err != nil {
 			log.Fatalf("open file %s error: %v", curDir+string(os.PathSeparator)+filename, err)
