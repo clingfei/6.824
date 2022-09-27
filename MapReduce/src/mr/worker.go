@@ -79,8 +79,9 @@ func (w *worker) Run() {
 }
 
 func (w *worker) RegisterId() {
+	var arg UNUSED
 	var reply int
-	if ok := call("Coordinator.Register", nil, &reply); !ok {
+	if ok := call("Coordinator.Register", &arg, &reply); !ok {
 		os.Exit(0)
 	}
 	w.id = reply
@@ -88,9 +89,15 @@ func (w *worker) RegisterId() {
 
 func (w *worker) GetTask() GetTaskReply {
 	reply := GetTaskReply{}
-	if ok := call("coordinator.Get", w.id, &reply); !ok {
+	if ok := call("Coordinator.Get", w.id, &reply); !ok {
 		os.Exit(0)
 	}
+	if reply.Task == Map {
+		fmt.Printf("Get Map Task, taskid: %v\n", reply.TaskId)
+	} else {
+		fmt.Printf("Get Reduce Task, taskid: %v\n", reply.TaskId)
+	}
+
 	return reply
 }
 
@@ -138,20 +145,21 @@ func (w *worker) MapWorker(reply *GetTaskReply) {
 				log.Fatalf("encode error: %v", err)
 			}
 		}
-		intermediate := fmt.Sprintf("mr-%d-%d", reply.TaskId, i)
-
-		os.Rename(tempFile.Name(), curDir+intermediate)
+		intermediate := fmt.Sprintf("mr-%d-%d", reply.TaskId, i+1)
+		os.Rename(tempFile.Name(), curDir+string(os.PathSeparator)+intermediate)
 	}
 	w.MapReport(reply.TaskId)
 }
 
 func (w *worker) ReduceWorker(reply *GetTaskReply) {
+	curDir, _ := os.Getwd()
 	var kva []KeyValue
 	for i := 1; i <= reply.MapCount; i++ {
 		filename := fmt.Sprintf("mr-%d-%d", i, reply.TaskId)
-		file, err := os.Open(filename)
+		fmt.Println(curDir + string(os.PathSeparator) + filename)
+		file, err := os.Open(curDir + string(os.PathSeparator) + filename)
 		if err != nil {
-			log.Fatalf("open file %s error: %v", filename, err)
+			log.Fatalf("open file %s error: %v", curDir+string(os.PathSeparator)+filename, err)
 		}
 		dec := json.NewDecoder(file)
 		for {
@@ -169,7 +177,7 @@ func (w *worker) ReduceWorker(reply *GetTaskReply) {
 		for j < len(kva) && kva[j].Key == kva[i].Key {
 			j++
 		}
-		values := []string{}
+		var values []string
 		for k := i; k < j; k++ {
 			values = append(values, kva[k].Value)
 		}
@@ -183,15 +191,15 @@ func (w *worker) ReduceWorker(reply *GetTaskReply) {
 
 func (w *worker) ReduceReport(Rno int) {
 	args := ReduceReport{Rno}
-	if ok := call("coordinator.ReduceReport", args, nil); !ok {
+	if ok := call("Coordinator.ReduceReport", args, nil); !ok {
 		os.Exit(0)
 	}
 }
 
 func (w *worker) MapReport(Mno int) {
 	args := MapReport{Mno}
-	if ok := call("coordinator.MapReport", args, nil); !ok {
-		log.Fatalf("report error")
+	if ok := call("Coordinator.MapReport", args, nil); !ok {
+		os.Exit(0)
 	}
 }
 
