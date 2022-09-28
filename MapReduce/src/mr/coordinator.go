@@ -169,26 +169,34 @@ func (c *Coordinator) checkTask(workerid int, reply *GetTaskReply) {
 	c.cond.L.Lock()
 	//fmt.Printf("CheckTask: workerid: %d\n\n", workerid)
 	if c.taskPhase == MapPhase {
-		c.mCounter++
-		for filename, status := range c.fileMap {
-			if status == UNPROCESS {
-				c.fileTask[c.mCounter] = filename
-				c.fileMap[filename] = PROCESSING
-				c.MapTask[c.mCounter] = &TaskStat{workerid, RUNNING, time.Now()}
-				reply.Task = Map
-				reply.Filename = filename
-				reply.TaskId = c.mCounter
-				c.cond.L.Unlock()
-				return
+		if c.mCounter >= len(c.fileMap) {
+			for mCounter, status := range c.MapTask {
+				if status.Status == FAILED || status.Status == UNSTARTED {
+					c.fileMap[c.fileTask[mCounter]] = PROCESSING
+					c.MapTask[mCounter] = &TaskStat{workerid, RUNNING, time.Now()}
+					reply.Task = Map
+					reply.Filename = c.fileTask[mCounter]
+					reply.TaskId = mCounter
+					c.cond.L.Unlock()
+					return
+				}
 			}
+			// 将这个worker加入等待队列
+			//fmt.Printf("Waiting: %d\n", workerid)
+			//c.WaitingQueue.Push(workerid)
+			c.cond.Wait()
+			//fmt.Printf("worker %v has been awoke\n", workerid)
+			c.cond.L.Unlock()
+			c.checkTask(workerid, reply)
+		} else {
+			c.mCounter++
+			filename := c.fileTask[c.mCounter]
+			c.fileMap[filename] = PROCESSING
+			c.MapTask[c.mCounter] = &TaskStat{workerid, RUNNING, time.Now()}
+			reply.Filename = filename
+			reply.TaskId = c.mCounter
+			c.cond.L.Unlock()
 		}
-		// 将这个worker加入等待队列
-		//fmt.Printf("Waiting: %d\n", workerid)
-		//c.WaitingQueue.Push(workerid)
-		c.cond.Wait()
-		//fmt.Printf("worker %v has been awoke\n", workerid)
-		c.cond.L.Unlock()
-		c.checkTask(workerid, reply)
 	} else {
 		//fmt.Println("Preparing report task")
 		if c.rCounter >= c.nReduce {
@@ -281,12 +289,18 @@ func (c *Coordinator) MapReport(args MapReport, reply *UNUSED) error {
 	//if c.fileMap[filename] == FINISHED {
 	//	fmt.Printf("MapReport: TaskId: %v, WorkerId: %v, filename: %v, status: FINISHED\n", args.Mno, c.MapTask[args.Mno].WorkerId, filename)
 	//}
-	for _, v := range c.fileMap {
-		if v != FINISHED {
-			//fmt.Printf("filename: %v, status: %v\n", k, v)
+	for _, v := range c.MapTask {
+		if v.Status != END {
 			return nil
 		}
 	}
+	//for _, v := range c.fileMap {
+	//	if v != FINISHED  {
+	//		//fmt.Printf("filename: %v, status: %v\n", k, v)
+	//		return nil
+	//	}
+	//}
+
 	c.taskPhase = ReducePhase
 	//fmt.Println("task phase switched.")
 	c.awakeRoutine()
@@ -335,6 +349,7 @@ func (c *Coordinator) schedule() {
 func (c *Coordinator) taskReschedule(taskid int) {
 	//fmt.Printf("taskReschedule entered\n")
 	if c.taskPhase == MapPhase {
+		c.MapTask[taskid].Status = FAILED
 		filename := c.fileTask[taskid]
 		c.fileMap[filename] = UNPROCESS
 	}
@@ -386,6 +401,13 @@ func MakeCoordinator(files []string, nReduce int) *Coordinator {
 		c.fileMap[filename] = UNPROCESS
 	}
 	c.taskPhase = MapPhase
+	c.MapTask[0] = &TaskStat{0, END, time.Now()}
+	i := 0
+	for k := range c.fileMap {
+		i++
+		c.MapTask[i] = &TaskStat{0, UNSTARTED, time.Now()}
+		c.fileTask[i] = k
+	}
 	c.ReduceTask[0] = &TaskStat{0, END, time.Now()}
 	for i := 1; i <= nReduce; i++ {
 		c.ReduceTask[i] = &TaskStat{0, UNSTARTED, time.Now()}
