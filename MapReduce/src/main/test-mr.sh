@@ -88,8 +88,9 @@ sleep 1
 # start multiple workers
 timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
 timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so
-
 sort mr-out* | grep . > mr-indexer-all
+cp mr-indexer-all ../mr-indexer-all
+cp mr-correct-indexer.txt ../mr-correct-indexer.txt
 if cmp mr-indexer-all mr-correct-indexer.txt
 then
   echo '---' indexer test: PASS

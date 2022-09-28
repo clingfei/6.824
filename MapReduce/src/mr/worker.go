@@ -116,8 +116,9 @@ func (w *worker) MapWorker(reply *GetTaskReply) {
 	}
 
 	kva := w.mapf(reply.Filename, string(content))
+	//sort.Sort(ByKey(kva))
 	reduces := make([][]KeyValue, reply.NReduce)
-
+	//sort.Sort(ByKey(kva))
 	for _, kv := range kva {
 		idx := ihash(kv.Key) % reply.NReduce
 		reduces[idx] = append(reduces[idx], kv)
@@ -126,7 +127,6 @@ func (w *worker) MapWorker(reply *GetTaskReply) {
 	//where your worker can later read them as input to Reduce tasks.
 	curDir, _ := os.Getwd()
 	for i := 0; i < reply.NReduce; i++ {
-		sort.Sort(ByKey(reduces[i]))
 		//To ensure that nobody observes partially written files in the presence of crashes,
 		//the MapReduce paper mentions the trick of using a temporary file and
 		//atomically renaming it once it is completely written.
@@ -170,6 +170,7 @@ func (w *worker) ReduceWorker(reply *GetTaskReply) {
 			kva = append(kva, kv)
 		}
 	}
+	sort.Sort(ByKey(kva))
 	target, _ := os.Create(fmt.Sprintf("mr-out-%d", reply.TaskId))
 	i := 0
 	for i < len(kva) {
