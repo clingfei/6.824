@@ -61,6 +61,7 @@ func TestReElection2A(t *testing.T) {
 
 	// if the leader disconnects, a new one should be elected.
 	cfg.disconnect(leader1)
+	fmt.Printf("disconnect %d\n", leader1)
 	cfg.checkOneLeader()
 
 	// if the old leader rejoins, that shouldn't
@@ -740,7 +741,7 @@ func TestFigure82C(t *testing.T) {
 			ms := rand.Int63() % (int64(RaftElectionTimeout/time.Millisecond) / 2)
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		} else {
-			ms := (rand.Int63() % 13)
+			ms := rand.Int63() % 13
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		}
 
@@ -826,7 +827,7 @@ func TestFigure8Unreliable2C(t *testing.T) {
 			ms := rand.Int63() % (int64(RaftElectionTimeout/time.Millisecond) / 2)
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		} else {
-			ms := (rand.Int63() % 13)
+			ms := rand.Int63() % 13
 			time.Sleep(time.Duration(ms) * time.Millisecond)
 		}
 

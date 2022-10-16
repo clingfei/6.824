@@ -118,7 +118,6 @@ func (rf *Raft) GetState() (int, bool) {
 	defer rf.mu.Unlock()
 	Term = rf.currentTerm
 	isleader = rf.state == Leader
-	fmt.Printf("id: %d, currentTerm: %d, votedFor: %d\n", rf.me, rf.currentTerm, rf.votedFor)
 	return Term, isleader
 }
 
@@ -198,22 +197,28 @@ type AppendEntriesReply struct {
 // resets the election timeout so that other servers don't step forward as leaders when one has already be elected。
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// 如果日志中存在prevLogIndex和prevLogTerm都相等的日志记录，那么success被设置为true
-
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	reply.Success = false
+	if args.Term < rf.currentTerm {
+		fmt.Printf("%d receive outdated heartbeat from %d, Term: %d, currentTerm: %d\n",
+			rf.me, args.LeaderId, args.Term, rf.currentTerm)
+		reply.Term, reply.Success = rf.currentTerm, false
+		return
+	}
+	if args.Term >= rf.currentTerm {
+		rf.isTimeout = false
+	}
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.state = Follower
 		rf.votedFor = -1
-		rf.isTimeout = false
+		//rf.isTimeout = false
 	} else if args.Term == rf.currentTerm && rf.state == Candidate {
 		rf.votedFor = -1
 		rf.state = Follower
-		rf.isTimeout = false
-	} else if rf.currentTerm > args.Term {
-		reply.Term, reply.Success = rf.currentTerm, false
+		//rf.isTimeout = false
 	}
+	reply.Success, reply.Term = true, rf.currentTerm
 }
 
 // the service says it has created a snapshot that has
@@ -260,29 +265,34 @@ type RequestVoteReply struct {
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
 	// vote for one another,
-	fmt.Printf("candidateId: %d, Term: %d, me: %d, currentTerm: %d\n", args.CandidateId, args.Term, rf.me, rf.currentTerm)
+	//fmt.Printf("candidateId: %d, Term: %d, me: %d, currentTerm: %d\n", args.CandidateId, args.Term, rf.me, rf.currentTerm)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	if args.Term < rf.currentTerm {
+		fmt.Printf("%d receive out-dated RequestVote from: %d, term: %d, currentTerm: %d\n",
+			rf.me, args.CandidateId, args.Term, rf.currentTerm)
 		reply.VoteGranted = false
 		reply.Term = rf.currentTerm
 		return
 	}
+	fmt.Printf("%d receive RequestVote from: %d, term: %d, currentTerm: %d\n",
+		rf.me, args.CandidateId, args.Term, rf.currentTerm)
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.votedFor = -1
 		rf.state = Follower
-		rf.isTimeout = false
 	}
 	reply.Term = rf.currentTerm
 	if rf.votedFor != -1 && rf.votedFor != args.CandidateId {
 		reply.VoteGranted = false
-		return
 	} else {
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateId
+		rf.isTimeout = false
 	}
-	fmt.Printf("RequestVote: me: %d, votedFor: %d, candidateId: %d\n", rf.me, rf.votedFor, args.CandidateId)
+	if reply.VoteGranted {
+		fmt.Printf(" %d voteFor: %d, currentTerm: %d\n", rf.me, rf.votedFor, rf.currentTerm)
+	}
 }
 
 //
@@ -369,11 +379,6 @@ func (rf *Raft) killed() bool {
 	return z == 1
 }
 
-type electionChan struct {
-	flag bool
-	idx  int
-}
-
 // 如果收到来自新的leader的AppendEntries RPC, 那么状态切换到follower
 func (rf *Raft) startElection() {
 	fmt.Printf("%d start election\n", rf.me)
@@ -381,7 +386,7 @@ func (rf *Raft) startElection() {
 	rf.currentTerm++
 	rf.state = Candidate
 	rf.votedFor = rf.me
-	rf.isTimeout = false
+	//rf.isTimeout = false
 	args := &RequestVoteArgs{
 		Term:        rf.currentTerm,
 		CandidateId: rf.me,
@@ -402,7 +407,7 @@ func (rf *Raft) startElection() {
 				if reply.Term > rf.currentTerm {
 					rf.currentTerm = reply.Term
 					rf.votedFor = -1
-					rf.state = 0
+					rf.state = Follower
 					rf.isTimeout = false
 				} else if reply.VoteGranted {
 					voters++
@@ -417,16 +422,6 @@ func (rf *Raft) startElection() {
 		}
 	}
 	wg.Wait()
-}
-
-func (rf *Raft) sleep() {
-	interval := rf.interval - time.Now().Sub(rf.lastbeat)
-	time.Sleep(interval)
-}
-
-type AppendEntriesReplyChan struct {
-	idx  int
-	flag bool
 }
 
 func (rf *Raft) heartBeat() {
@@ -452,7 +447,7 @@ func (rf *Raft) heartBeat() {
 						return
 					}
 					rf.mu.Lock()
-					if reply.Term > rf.currentTerm {
+					if !reply.Success {
 						rf.state = Follower
 						rf.votedFor = -1
 						rf.isTimeout = false
@@ -461,6 +456,7 @@ func (rf *Raft) heartBeat() {
 				}(peer)
 			}
 		}
+		rf.isTimeout = false
 		time.Sleep(time.Millisecond * 100)
 	}
 }
@@ -488,7 +484,9 @@ func (rf *Raft) ticker() {
 		if rf.isTimeout {
 			go rf.startElection()
 		} else {
-			rf.isTimeout = true
+			if rf.state == Follower {
+				rf.isTimeout = true
+			}
 		}
 		rf.mu.Unlock()
 	}
