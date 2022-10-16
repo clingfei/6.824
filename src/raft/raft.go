@@ -286,6 +286,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if rf.votedFor != -1 && rf.votedFor != args.CandidateId {
 		reply.VoteGranted = false
 	} else {
+		fmt.Printf("%d's votedFor: %d\n", rf.me, rf.votedFor)
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateId
 		rf.isTimeout = false
@@ -383,9 +384,10 @@ func (rf *Raft) killed() bool {
 func (rf *Raft) startElection() {
 	fmt.Printf("%d start election\n", rf.me)
 	rf.mu.Lock()
-	rf.currentTerm++
-	rf.state = Candidate
-	rf.votedFor = rf.me
+	if rf.state == Candidate {
+		rf.currentTerm++
+		rf.votedFor = rf.me
+	}
 	//rf.isTimeout = false
 	args := &RequestVoteArgs{
 		Term:        rf.currentTerm,
@@ -399,6 +401,9 @@ func (rf *Raft) startElection() {
 		if peer != rf.me {
 			go func(peer int) {
 				defer wg.Done()
+				if rf.state != Candidate {
+					return
+				}
 				reply := &RequestVoteReply{}
 				if ok := rf.sendRequestVote(peer, args, reply); !ok {
 					return
@@ -482,6 +487,7 @@ func (rf *Raft) ticker() {
 		//	break
 		//}
 		if rf.isTimeout {
+			rf.state = Candidate
 			go rf.startElection()
 		} else {
 			if rf.state == Follower {
