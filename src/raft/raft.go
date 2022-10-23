@@ -266,7 +266,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
-	//fmt.Printf("AppendEntries end\n")
+	fmt.Printf("%d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, len(rf.log))
 }
 
 // the service says it has created a snapshot that has
@@ -423,13 +423,15 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 			args := &AppendEntriesArgs{
 				Term:         rf.currentTerm,
 				LeaderId:     rf.me,
-				PrevLogIndex: rf.matchIndex[peer],
-				PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
+				PrevLogIndex: len(rf.log) - 2,
+				PrevLogTerm:  rf.log[len(rf.log)-2].Term,
 				Entries:      []LogEntry{entry},
 				LeaderCommit: rf.commitIndex,
 			}
 			if args.PrevLogIndex >= rf.nextIndex[peer] {
-				args.Entries = rf.log[rf.nextIndex[peer]:]
+				args.PrevLogIndex = rf.nextIndex[peer] - 1
+				args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
+				args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
 			}
 			rf.mu.Unlock()
 			go func(peer int) {
@@ -448,10 +450,14 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 						flag = false
 					} else {
 						fmt.Printf("%d doesn't contain an entry at prevLogIndex whose term matches prevLogTerm\n", peer)
-						rf.nextIndex[peer] = rf.matchIndex[peer]
-						if rf.nextIndex[peer] > 0 {
-							rf.matchIndex[peer] = rf.nextIndex[peer] - 1
+						rf.mu.Lock()
+						if rf.matchIndex[peer] > 0 {
+							rf.nextIndex[peer] = rf.matchIndex[peer]
+							rf.matchIndex[peer]--
+						} else {
+							rf.nextIndex[peer] = 1
 						}
+						rf.mu.Unlock()
 					}
 				} else {
 					fmt.Printf("true\n")
@@ -469,8 +475,6 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	defer rf.mu.Unlock()
 	rf.isTimeout = false
 	//rf.isheartbeat = true
-
-	fmt.Printf("%d reset isheartbeat\n", rf.me)
 	if !flag {
 		return -1, -1, false
 	}
@@ -614,11 +618,25 @@ func (rf *Raft) heartBeat() {
 				args := &AppendEntriesArgs{
 					Term:         rf.currentTerm,
 					LeaderId:     rf.me,
-					PrevLogIndex: rf.matchIndex[peer],
-					PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
+					PrevLogIndex: len(rf.log) - 1,
+					PrevLogTerm:  rf.log[len(rf.log)-1].Term,
 					Entries:      []LogEntry{},
 					LeaderCommit: rf.commitIndex,
 				}
+				if args.PrevLogIndex >= rf.nextIndex[peer] {
+					args.PrevLogIndex = rf.nextIndex[peer] - 1
+					args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
+					args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
+				}
+				//args := &AppendEntriesArgs{
+				//	Term:         rf.currentTerm,
+				//	LeaderId:     rf.me,
+				//	PrevLogIndex: rf.matchIndex[peer],
+				//	PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
+				//	Entries:      rf.log[rf.matchIndex[peer]+1 : len(rf.log)],
+				//	LeaderCommit: rf.commitIndex,
+				//}
+				//args.Entries = rf.log[rf.matchIndex[peer]:len(rf.log)]
 				rf.mu.Unlock()
 				go func(peer int) {
 					reply := &AppendEntriesReply{}
@@ -635,16 +653,9 @@ func (rf *Raft) heartBeat() {
 				}(peer)
 			}
 		}
-		//} else {
-		//	rf.mu.Lock()
-		//	fmt.Printf("%d set isheartbeat to true\n", rf.me)
-		//	rf.isheartbeat = true
-		//	rf.mu.Unlock()
-		//}
 		rf.mu.Lock()
 		rf.isTimeout = false
 		rf.mu.Unlock()
-		//time.Sleep(time.Millisecond * 100)
 	}
 }
 
