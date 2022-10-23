@@ -418,13 +418,13 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	index = len(rf.log) - 1
 	rf.mu.Unlock()
 	flag := true
-	wg := sync.WaitGroup{}
-	wg.Add(len(rf.peers) - 1)
+	//wg := sync.WaitGroup{}
+	//wg.Add(len(rf.peers) - 1)
 	// start的作用是使leader发送下一个command到Raft的日志中，
 	for peer := range rf.peers {
 		if peer != rf.me {
 			go func(peer int) {
-				defer wg.Done()
+				//defer wg.Done()
 				rf.mu.Lock()
 				args := &AppendEntriesArgs{
 					Term:         rf.currentTerm,
@@ -474,7 +474,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 			}(peer)
 		}
 	}
-	wg.Wait()
+	//wg.Wait()
+	time.Sleep(10 * time.Millisecond)
 	rf.mu.Lock()
 	rf.isTimeout = false
 	rf.mu.Unlock()
@@ -649,23 +650,21 @@ func (rf *Raft) heartBeat() {
 						return
 					}
 					if !reply.Success {
+						rf.mu.Lock()
 						if reply.Term > rf.currentTerm {
-							rf.mu.Lock()
 							rf.state = Follower
 							rf.votedFor = -1
 							rf.isTimeout = false
 							flag = false
-							rf.mu.Unlock()
 						} else {
-							rf.mu.Lock()
 							if rf.matchIndex[peer] > 0 {
 								rf.nextIndex[peer] = rf.matchIndex[peer]
 								rf.matchIndex[peer]--
 							} else {
 								rf.nextIndex[peer] = 1
 							}
-							rf.mu.Unlock()
 						}
+						rf.mu.Unlock()
 					} else {
 						rf.mu.Lock()
 						rf.nextIndex[peer] = len(rf.log)
