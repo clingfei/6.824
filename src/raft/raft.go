@@ -217,6 +217,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		//fmt.Printf("%d reset isTimeout\n", rf.me)
 		rf.isTimeout = false
 	}
+	fmt.Printf("%d receive from %d\n", rf.me, args.LeaderId)
+	fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d\n",
+		args.PrevLogIndex, args.PrevLogTerm, args.Term, args.LeaderCommit, len(args.Entries))
+	if len(rf.log)-1 < args.PrevLogIndex ||
+		(len(rf.log)-1 >= args.PrevLogIndex && rf.log[args.PrevLogIndex].Term != args.PrevLogTerm) {
+		reply.Success, reply.Term = false, rf.currentTerm
+		fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, "+
+			"currentLogIndex: %d, currentLogTerm: %d\n", args.PrevLogIndex, args.PrevLogTerm, len(rf.log)-1, rf.log[len(rf.log)-1].Term)
+		return
+	}
 	if len(args.Entries) == 0 {
 		if args.Term > rf.currentTerm {
 			rf.currentTerm = args.Term
@@ -228,17 +238,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		}
 		reply.Success, reply.Term = true, rf.currentTerm
 	} else {
-		fmt.Printf("%d receive from %d\n", rf.me, args.LeaderId)
-		fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d\n",
-			args.PrevLogIndex, args.PrevLogTerm, args.Term, args.LeaderCommit, len(args.Entries))
-		// 如果rf.log的长度比args.PrevLogIndex小，应该报错？
-		if len(rf.log)-1 < args.PrevLogIndex ||
-			(len(rf.log)-1 >= args.PrevLogIndex && rf.log[args.PrevLogIndex].Term != args.PrevLogTerm) {
-			reply.Success, reply.Term = false, rf.currentTerm
-			fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, "+
-				"currentLogIndex: %d, currentLogTerm: %d\n", args.PrevLogIndex, args.PrevLogTerm, len(rf.log)-1, rf.log[len(rf.log)-1].Term)
-			return
-		}
 		i := 0
 		for i+args.PrevLogIndex+1 < len(rf.log) && i < len(args.Entries) {
 			if rf.log[i+args.PrevLogIndex+1].Term != args.Entries[i].Term {
@@ -259,7 +258,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = int(math.Min(float64(args.LeaderCommit), float64(len(rf.log)-1)))
 	}
-	//rf.commitIndex = 1
 	for i := lastCommitIndex + 1; i <= rf.commitIndex; i++ {
 		var applyMsg ApplyMsg
 		applyMsg.Command = rf.log[i].Command
@@ -270,7 +268,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
-	fmt.Printf("%d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, len(rf.log))
+	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, len(rf.log))
 }
 
 // the service says it has created a snapshot that has
@@ -425,23 +423,23 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// start的作用是使leader发送下一个command到Raft的日志中，
 	for peer := range rf.peers {
 		if peer != rf.me {
-			rf.mu.Lock()
-			args := &AppendEntriesArgs{
-				Term:         rf.currentTerm,
-				LeaderId:     rf.me,
-				PrevLogIndex: len(rf.log) - 2,
-				PrevLogTerm:  rf.log[len(rf.log)-2].Term,
-				Entries:      []LogEntry{entry},
-				LeaderCommit: rf.commitIndex,
-			}
-			if args.PrevLogIndex >= rf.nextIndex[peer] {
-				args.PrevLogIndex = rf.nextIndex[peer] - 1
-				args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
-				args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
-			}
-			rf.mu.Unlock()
 			go func(peer int) {
 				defer wg.Done()
+				rf.mu.Lock()
+				args := &AppendEntriesArgs{
+					Term:         rf.currentTerm,
+					LeaderId:     rf.me,
+					PrevLogIndex: len(rf.log) - 2,
+					PrevLogTerm:  rf.log[len(rf.log)-2].Term,
+					Entries:      []LogEntry{entry},
+					LeaderCommit: rf.commitIndex,
+				}
+				if args.PrevLogIndex >= rf.nextIndex[peer] {
+					args.PrevLogIndex = rf.nextIndex[peer] - 1
+					args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
+					args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
+				}
+				rf.mu.Unlock()
 				reply := &AppendEntriesReply{}
 				if ok := rf.sendAppendEntries(peer, args, reply); !ok {
 					return
@@ -452,8 +450,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 						rf.state = Follower
 						rf.votedFor = -1
 						rf.isTimeout = false
-						rf.mu.Unlock()
 						flag = false
+						rf.mu.Unlock()
 					} else {
 						fmt.Printf("%d doesn't contain an entry at prevLogIndex whose term matches prevLogTerm\n", peer)
 						rf.mu.Lock()
@@ -466,7 +464,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 						rf.mu.Unlock()
 					}
 				} else {
-					fmt.Printf("true\n")
+					//fmt.Printf("true\n")
 					rf.mu.Lock()
 					rf.nextIndex[peer] = len(rf.log)
 					rf.matchIndex[peer] = len(rf.log) - 1
@@ -478,12 +476,18 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	}
 	wg.Wait()
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
 	rf.isTimeout = false
-	//rf.isheartbeat = true
+	rf.mu.Unlock()
 	if !flag {
 		return -1, -1, false
 	}
+	rf.Apply()
+	return index, rf.currentTerm, true
+}
+
+func (rf *Raft) Apply() {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	lastcommitIdx := rf.commitIndex
 	n := rf.commitIndex + 1
 	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
@@ -521,8 +525,6 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
-	DEBUG("Leader's log length: %d\n", len(rf.log))
-	return index, rf.currentTerm, true
 }
 
 //
@@ -619,45 +621,67 @@ func (rf *Raft) heartBeat() {
 		}
 		//if rf.isheartbeat {
 		rf.mu.Unlock()
-		wg := sync.WaitGroup{}
-		wg.Add(len(rf.peers) - 1)
+		flag := true
+		//wg := sync.WaitGroup{}
+		//wg.Add(len(rf.peers) - 1)
+		//fmt.Printf("%d sending heartBeat...\n", rf.me)
 		for peer := range rf.peers {
 			if peer != rf.me {
-				rf.mu.Lock()
-				args := &AppendEntriesArgs{
-					Term:         rf.currentTerm,
-					LeaderId:     rf.me,
-					PrevLogIndex: len(rf.log) - 1,
-					PrevLogTerm:  rf.log[len(rf.log)-1].Term,
-					Entries:      []LogEntry{},
-					LeaderCommit: rf.commitIndex,
-				}
-				if args.PrevLogIndex >= rf.nextIndex[peer] {
-					args.PrevLogIndex = rf.nextIndex[peer] - 1
-					args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
-					args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
-				}
-				rf.mu.Unlock()
 				go func(peer int) {
-					defer wg.Done()
+					//defer wg.Done()
+					rf.mu.Lock()
+					args := &AppendEntriesArgs{
+						Term:         rf.currentTerm,
+						LeaderId:     rf.me,
+						PrevLogIndex: len(rf.log) - 1,
+						PrevLogTerm:  rf.log[len(rf.log)-1].Term,
+						Entries:      []LogEntry{},
+						LeaderCommit: rf.commitIndex,
+					}
+					if args.PrevLogIndex >= rf.nextIndex[peer] {
+						args.PrevLogIndex = rf.nextIndex[peer] - 1
+						args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
+						args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
+					}
+					rf.mu.Unlock()
 					reply := &AppendEntriesReply{}
 					if ok := rf.sendAppendEntries(peer, args, reply); !ok {
 						return
 					}
-					rf.mu.Lock()
 					if !reply.Success {
-						rf.state = Follower
-						rf.votedFor = -1
-						rf.isTimeout = false
+						if reply.Term > rf.currentTerm {
+							rf.mu.Lock()
+							rf.state = Follower
+							rf.votedFor = -1
+							rf.isTimeout = false
+							flag = false
+							rf.mu.Unlock()
+						} else {
+							rf.mu.Lock()
+							if rf.matchIndex[peer] > 0 {
+								rf.nextIndex[peer] = rf.matchIndex[peer]
+								rf.matchIndex[peer]--
+							} else {
+								rf.nextIndex[peer] = 1
+							}
+							rf.mu.Unlock()
+						}
+					} else {
+						rf.mu.Lock()
+						rf.nextIndex[peer] = len(rf.log)
+						rf.matchIndex[peer] = len(rf.log) - 1
+						rf.mu.Unlock()
 					}
-					rf.mu.Unlock()
 				}(peer)
 			}
 		}
-		wg.Wait()
+		//wg.Wait()
 		rf.mu.Lock()
 		rf.isTimeout = false
 		rf.mu.Unlock()
+		if flag {
+			rf.Apply()
+		}
 	}
 }
 
@@ -668,8 +692,6 @@ func (rf *Raft) ticker() {
 		// Your code here to check if a leader election should
 		// be started and to randomize sleeping time using
 		// time.Sleep().
-		// 如何判断是否超时？
-		// 如何设置超时时间？
 		// Make sure the election timeouts in different peers don't always fire at the same time,
 		// or else all peers will vote only for themselves and no one will become the leader.
 		rand.Seed(time.Now().UnixNano())
