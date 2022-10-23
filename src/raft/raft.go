@@ -141,6 +141,10 @@ func (rf *Raft) persist() {
 	// rf.persister.SaveRaftState(data)
 }
 
+func DEBUG(format string, a ...interface{}) {
+	fmt.Printf(format, a...)
+}
+
 //
 // restore previously persisted state.
 //
@@ -404,14 +408,16 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 //
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.mu.Lock()
+	index := -1
 	// Your code here (2B).
 	if rf.state != Leader {
 		rf.mu.Unlock()
-		return -1, -1, false
+		return index, -1, false
 	}
 	fmt.Printf("%d is Leader, start AppendEntries\n", rf.me)
 	entry := LogEntry{rf.currentTerm, len(rf.log), command}
 	rf.log = append(rf.log, entry)
+	index = len(rf.log) - 1
 	rf.mu.Unlock()
 	flag := true
 	wg := sync.WaitGroup{}
@@ -464,8 +470,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 					rf.mu.Lock()
 					rf.nextIndex[peer] = len(rf.log)
 					rf.matchIndex[peer] = len(rf.log) - 1
-					rf.mu.Unlock()
 					fmt.Printf("%d's matchIndex is %d\n", peer, rf.matchIndex[peer])
+					rf.mu.Unlock()
 				}
 			}(peer)
 		}
@@ -515,7 +521,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
-	return len(rf.log) - 1, rf.currentTerm, true
+	DEBUG("Leader's log length: %d\n", len(rf.log))
+	return index, rf.currentTerm, true
 }
 
 //
@@ -612,6 +619,8 @@ func (rf *Raft) heartBeat() {
 		}
 		//if rf.isheartbeat {
 		rf.mu.Unlock()
+		wg := sync.WaitGroup{}
+		wg.Add(len(rf.peers) - 1)
 		for peer := range rf.peers {
 			if peer != rf.me {
 				rf.mu.Lock()
@@ -628,17 +637,9 @@ func (rf *Raft) heartBeat() {
 					args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
 					args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
 				}
-				//args := &AppendEntriesArgs{
-				//	Term:         rf.currentTerm,
-				//	LeaderId:     rf.me,
-				//	PrevLogIndex: rf.matchIndex[peer],
-				//	PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
-				//	Entries:      rf.log[rf.matchIndex[peer]+1 : len(rf.log)],
-				//	LeaderCommit: rf.commitIndex,
-				//}
-				//args.Entries = rf.log[rf.matchIndex[peer]:len(rf.log)]
 				rf.mu.Unlock()
 				go func(peer int) {
+					defer wg.Done()
 					reply := &AppendEntriesReply{}
 					if ok := rf.sendAppendEntries(peer, args, reply); !ok {
 						return
@@ -653,6 +654,7 @@ func (rf *Raft) heartBeat() {
 				}(peer)
 			}
 		}
+		wg.Wait()
 		rf.mu.Lock()
 		rf.isTimeout = false
 		rf.mu.Unlock()
