@@ -147,12 +147,9 @@ func (rf *Raft) persist() {
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
 	e.Encode(rf.log)
+	e.Encode(rf.commitIndex)
 	data := w.Bytes()
 	rf.persister.SaveRaftState(data)
-}
-
-func DEBUG(format string, a ...interface{}) {
-	fmt.Printf(format, a...)
 }
 
 //
@@ -168,14 +165,17 @@ func (rf *Raft) readPersist(data []byte) {
 
 	var currentTerm int
 	var votedFor int
+	var commitIndex int
 	var log []LogEntry
-	if d.Decode(&currentTerm) != nil || d.Decode(&votedFor) != nil || d.Decode(&log) != nil {
+	if d.Decode(&currentTerm) != nil || d.Decode(&votedFor) != nil ||
+		d.Decode(&log) != nil || d.Decode(&commitIndex) != nil {
 		return
 	} else {
 		rf.mu.Lock()
 		rf.votedFor = votedFor
 		rf.log = log
 		rf.currentTerm = currentTerm
+		rf.commitIndex = commitIndex
 		rf.mu.Unlock()
 	}
 
@@ -191,6 +191,10 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.xxx = xxx
 	//   rf.yyy = yyy
 	// }
+}
+
+func DEBUG(format string, a ...interface{}) {
+	fmt.Printf(format, a...)
 }
 
 //
@@ -446,10 +450,20 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	index = entry.Index
 	rf.persist()
 	rf.mu.Unlock()
+	flag := rf.BroadCast()
+	time.Sleep(10 * time.Millisecond)
+	rf.mu.Lock()
+	rf.isTimeout = false
+	rf.mu.Unlock()
+	if !flag {
+		return -1, -1, false
+	}
+	rf.Apply()
+	return index, rf.currentTerm, true
+}
+
+func (rf *Raft) BroadCast() bool {
 	flag := true
-	//wg := sync.WaitGroup{}
-	//wg.Add(len(rf.peers) - 1)
-	// start的作用是使leader发送下一个command到Raft的日志中，
 	for peer := range rf.peers {
 		if peer != rf.me {
 			go func(peer int) {
@@ -458,8 +472,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 				args := &AppendEntriesArgs{
 					Term:         rf.currentTerm,
 					LeaderId:     rf.me,
-					PrevLogIndex: rf.matchIndex[peer],
-					PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
+					PrevLogIndex: rf.nextIndex[peer] - 1,
+					PrevLogTerm:  rf.log[rf.nextIndex[peer]-1].Term,
 					Entries:      rf.log[rf.nextIndex[peer]:],
 					LeaderCommit: rf.commitIndex,
 				}
@@ -489,8 +503,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 						rf.mu.Unlock()
 					}
 				} else {
-					//fmt.Printf("true\n")
 					rf.mu.Lock()
+					fmt.Printf("%d's length: %d\n", rf.me, len(rf.log))
 					rf.nextIndex[peer] = len(rf.log)
 					rf.matchIndex[peer] = len(rf.log) - 1
 					fmt.Printf("%d's matchIndex is %d\n", peer, rf.matchIndex[peer])
@@ -499,29 +513,24 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 			}(peer)
 		}
 	}
-	//wg.Wait()
-	time.Sleep(10 * time.Millisecond)
-	rf.mu.Lock()
-	rf.isTimeout = false
-	rf.mu.Unlock()
-	if !flag {
-		return -1, -1, false
-	}
-	rf.Apply()
-	return index, rf.currentTerm, true
+	return flag
 }
 
 func (rf *Raft) Apply() {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	lastcommitIdx := rf.commitIndex
-	n := int(math.Max(float64(rf.commitIndex), float64(rf.currentLogIndex)) + 1)
+	n := rf.commitIndex + 1
+	for n < len(rf.log) && rf.log[n].Term != rf.currentTerm {
+		n++
+	}
+	//n := int(math.Max(float64(rf.commitIndex), float64(rf.currentLogIndex)) + 1)
 	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
 	for n < len(rf.log) {
-		if rf.log[n].Term < rf.currentTerm {
-			n++
-			continue
-		}
+		//if rf.log[n].Term < rf.currentTerm {
+		//	n++
+		//	continue
+		//}
 		counter := 1
 		fmt.Printf("n: %d\n", n)
 		for peer := range rf.peers {
@@ -638,73 +647,18 @@ func (rf *Raft) startElection() {
 
 func (rf *Raft) heartBeat() {
 	for rf.killed() == false {
-		//fmt.Printf("%d start heart beat, current isheartbeat is true\n", rf.me)
 		time.Sleep(time.Millisecond * 100)
 		rf.mu.Lock()
 		if rf.state != Leader {
 			rf.state = Follower
 			rf.votedFor = -1
 			rf.isTimeout = false
-			rf.mu.Unlock()
 			rf.persist()
+			rf.mu.Unlock()
 			return
 		}
-		//if rf.isheartbeat {
 		rf.mu.Unlock()
-		flag := true
-		//wg := sync.WaitGroup{}
-		//wg.Add(len(rf.peers) - 1)
-		//fmt.Printf("%d sending heartBeat...\n", rf.me)
-		for peer := range rf.peers {
-			if peer != rf.me {
-				go func(peer int) {
-					//defer wg.Done()
-					rf.mu.Lock()
-					args := &AppendEntriesArgs{
-						Term:         rf.currentTerm,
-						LeaderId:     rf.me,
-						PrevLogIndex: len(rf.log) - 1,
-						PrevLogTerm:  rf.log[len(rf.log)-1].Term,
-						Entries:      []LogEntry{},
-						LeaderCommit: rf.commitIndex,
-					}
-					if args.PrevLogIndex >= rf.nextIndex[peer] {
-						args.PrevLogIndex = rf.nextIndex[peer] - 1
-						args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
-						args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
-					}
-					rf.mu.Unlock()
-					reply := &AppendEntriesReply{}
-					if ok := rf.sendAppendEntries(peer, args, reply); !ok {
-						return
-					}
-					if !reply.Success {
-						rf.mu.Lock()
-						if reply.Term > rf.currentTerm {
-							rf.state = Follower
-							rf.votedFor = -1
-							rf.isTimeout = false
-							flag = false
-							rf.persist()
-						} else {
-							if rf.matchIndex[peer] > 0 {
-								rf.nextIndex[peer] = rf.matchIndex[peer]
-								rf.matchIndex[peer]--
-							} else {
-								rf.nextIndex[peer] = 1
-							}
-						}
-						rf.mu.Unlock()
-					} else {
-						rf.mu.Lock()
-						rf.nextIndex[peer] = len(rf.log)
-						rf.matchIndex[peer] = len(rf.log) - 1
-						rf.mu.Unlock()
-					}
-				}(peer)
-			}
-		}
-		//wg.Wait()
+		flag := rf.BroadCast()
 		rf.mu.Lock()
 		rf.isTimeout = false
 		rf.mu.Unlock()
