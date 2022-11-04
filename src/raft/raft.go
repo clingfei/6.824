@@ -443,7 +443,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	fmt.Printf("%d is Leader, start AppendEntries\n", rf.me)
 	entry := LogEntry{rf.currentTerm, len(rf.log), command}
 	rf.log = append(rf.log, entry)
-	index = len(rf.log) - 1
+	index = entry.Index
 	rf.persist()
 	rf.mu.Unlock()
 	flag := true
@@ -458,15 +458,10 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 				args := &AppendEntriesArgs{
 					Term:         rf.currentTerm,
 					LeaderId:     rf.me,
-					PrevLogIndex: len(rf.log) - 2,
-					PrevLogTerm:  rf.log[len(rf.log)-2].Term,
-					Entries:      []LogEntry{entry},
+					PrevLogIndex: rf.matchIndex[peer],
+					PrevLogTerm:  rf.log[rf.matchIndex[peer]].Term,
+					Entries:      rf.log[rf.nextIndex[peer]:],
 					LeaderCommit: rf.commitIndex,
-				}
-				if args.PrevLogIndex >= rf.nextIndex[peer] {
-					args.PrevLogIndex = rf.nextIndex[peer] - 1
-					args.PrevLogTerm = rf.log[args.PrevLogIndex].Term
-					args.Entries = rf.log[rf.nextIndex[peer]:len(rf.log)]
 				}
 				rf.mu.Unlock()
 				reply := &AppendEntriesReply{}
@@ -537,7 +532,6 @@ func (rf *Raft) Apply() {
 				}
 			}
 		}
-		fmt.Printf("counter: %d\n", counter)
 		if counter*2 > len(rf.peers) {
 			rf.commitIndex = n
 			n++
