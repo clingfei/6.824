@@ -101,6 +101,9 @@ type Raft struct {
 	isTimeout   bool
 	isheartbeat bool
 
+	// Leader只能commit自己当前任期的日志
+	currentLogIndex int
+
 	applyCh chan ApplyMsg
 }
 
@@ -141,14 +144,9 @@ func (rf *Raft) persist() {
 	// rf.persister.SaveRaftState(data)
 	w := new(bytes.Buffer)
 	e := labgob.NewEncoder(w)
-	rf.mu.Lock()
-	currentTerm := rf.currentTerm
-	votedFor := rf.votedFor
-	commitIndex := rf.commitIndex
-	rf.mu.Unlock()
-	e.Encode(currentTerm)
-	e.Encode(votedFor)
-	e.Encode(rf.log[:commitIndex+1])
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.log)
 	data := w.Bytes()
 	rf.persister.SaveRaftState(data)
 }
@@ -297,7 +295,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.lastApplied = rf.commitIndex
 	}
 	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, len(rf.log))
-	go rf.persist()
+	rf.persist()
 }
 
 // the service says it has created a snapshot that has
@@ -373,12 +371,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateId
 		rf.isTimeout = false
+		rf.persist()
 	}
 	//rf.mu.Unlock()
 	if reply.VoteGranted {
 		fmt.Printf(" %d voteFor: %d, currentTerm: %d\n", rf.me, rf.votedFor, rf.currentTerm)
 	}
-	go rf.persist()
 }
 
 //
@@ -446,6 +444,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	entry := LogEntry{rf.currentTerm, len(rf.log), command}
 	rf.log = append(rf.log, entry)
 	index = len(rf.log) - 1
+	rf.persist()
 	rf.mu.Unlock()
 	flag := true
 	//wg := sync.WaitGroup{}
@@ -481,6 +480,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 						rf.votedFor = -1
 						rf.isTimeout = false
 						flag = false
+						rf.persist()
 						rf.mu.Unlock()
 					} else {
 						fmt.Printf("%d doesn't contain an entry at prevLogIndex whose term matches prevLogTerm\n", peer)
@@ -510,11 +510,9 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.isTimeout = false
 	rf.mu.Unlock()
 	if !flag {
-		go rf.persist()
 		return -1, -1, false
 	}
 	rf.Apply()
-	go rf.persist()
 	return index, rf.currentTerm, true
 }
 
@@ -522,7 +520,7 @@ func (rf *Raft) Apply() {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	lastcommitIdx := rf.commitIndex
-	n := rf.commitIndex + 1
+	n := int(math.Max(float64(rf.commitIndex), float64(rf.currentLogIndex)) + 1)
 	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
 	for n < len(rf.log) {
 		if rf.log[n].Term < rf.currentTerm {
@@ -588,6 +586,7 @@ func (rf *Raft) startElection() {
 	if rf.state == Candidate {
 		rf.currentTerm++
 		rf.votedFor = rf.me
+		rf.persist()
 	}
 	//rf.isTimeout = false
 	args := &RequestVoteArgs{
@@ -620,9 +619,10 @@ func (rf *Raft) startElection() {
 					rf.votedFor = -1
 					rf.state = Follower
 					rf.isTimeout = false
+					rf.persist()
 				} else if reply.VoteGranted {
 					voters++
-					if voters*2 > len(rf.peers) {
+					if rf.state == Candidate && voters*2 > len(rf.peers) {
 						rf.state = Leader
 						rf.isTimeout = false
 						//rf.isheartbeat = true
@@ -630,6 +630,8 @@ func (rf *Raft) startElection() {
 							rf.nextIndex[i] = len(rf.log)
 							rf.matchIndex[i] = 0
 						}
+						rf.currentLogIndex = len(rf.log) - 1
+						rf.persist()
 						go rf.heartBeat()
 					}
 				}
@@ -638,7 +640,6 @@ func (rf *Raft) startElection() {
 		}
 	}
 	wg.Wait()
-	go rf.persist()
 }
 
 func (rf *Raft) heartBeat() {
@@ -651,7 +652,7 @@ func (rf *Raft) heartBeat() {
 			rf.votedFor = -1
 			rf.isTimeout = false
 			rf.mu.Unlock()
-			go rf.persist()
+			rf.persist()
 			return
 		}
 		//if rf.isheartbeat {
@@ -690,6 +691,7 @@ func (rf *Raft) heartBeat() {
 							rf.votedFor = -1
 							rf.isTimeout = false
 							flag = false
+							rf.persist()
 						} else {
 							if rf.matchIndex[peer] > 0 {
 								rf.nextIndex[peer] = rf.matchIndex[peer]
@@ -714,7 +716,6 @@ func (rf *Raft) heartBeat() {
 		rf.mu.Unlock()
 		if flag {
 			rf.Apply()
-			go rf.persist()
 		}
 	}
 }
