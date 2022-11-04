@@ -147,7 +147,6 @@ func (rf *Raft) persist() {
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
 	e.Encode(rf.log)
-	e.Encode(rf.commitIndex)
 	data := w.Bytes()
 	rf.persister.SaveRaftState(data)
 }
@@ -167,8 +166,7 @@ func (rf *Raft) readPersist(data []byte) {
 	var votedFor int
 	var commitIndex int
 	var log []LogEntry
-	if d.Decode(&currentTerm) != nil || d.Decode(&votedFor) != nil ||
-		d.Decode(&log) != nil || d.Decode(&commitIndex) != nil {
+	if d.Decode(&currentTerm) != nil || d.Decode(&votedFor) != nil || d.Decode(&log) != nil {
 		return
 	} else {
 		rf.mu.Lock()
@@ -284,11 +282,10 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		}
 		reply.Term, reply.Success = rf.currentTerm, true
 	}
-	lastCommitIndex := rf.commitIndex
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = int(math.Min(float64(args.LeaderCommit), float64(len(rf.log)-1)))
 	}
-	for i := lastCommitIndex + 1; i <= rf.commitIndex; i++ {
+	for i := rf.lastApplied + 1; i <= rf.commitIndex; i++ {
 		var applyMsg ApplyMsg
 		applyMsg.Command = rf.log[i].Command
 		applyMsg.CommandIndex = i
@@ -505,8 +502,8 @@ func (rf *Raft) BroadCast() bool {
 				} else {
 					rf.mu.Lock()
 					fmt.Printf("%d's length: %d\n", rf.me, len(rf.log))
-					rf.nextIndex[peer] = len(rf.log)
-					rf.matchIndex[peer] = len(rf.log) - 1
+					rf.matchIndex[peer] = args.PrevLogIndex + len(args.Entries)
+					rf.nextIndex[peer] = rf.matchIndex[peer] + 1
 					fmt.Printf("%d's matchIndex is %d\n", peer, rf.matchIndex[peer])
 					rf.mu.Unlock()
 				}
@@ -678,7 +675,7 @@ func (rf *Raft) ticker() {
 		// Make sure the election timeouts in different peers don't always fire at the same time,
 		// or else all peers will vote only for themselves and no one will become the leader.
 		rand.Seed(time.Now().UnixNano())
-		sleepInterval := rand.Intn(500) + 500
+		sleepInterval := rand.Intn(150) + 250
 		time.Sleep(time.Millisecond * time.Duration(sleepInterval))
 
 		rf.mu.Lock()
