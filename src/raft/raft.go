@@ -18,6 +18,7 @@ package raft
 //
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/rand"
@@ -27,7 +28,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	//	"6.824/labgob"
+	"6.824/labgob"
 	"6.824/labrpc"
 )
 
@@ -134,11 +135,22 @@ func (rf *Raft) persist() {
 	// Your code here (2C).
 	// Example:
 	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
 	// e.Encode(rf.xxx)
 	// e.Encode(rf.yyy)
 	// data := w.Bytes()
 	// rf.persister.SaveRaftState(data)
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	rf.mu.Lock()
+	currentTerm := rf.currentTerm
+	votedFor := rf.votedFor
+	commitIndex := rf.commitIndex
+	rf.mu.Unlock()
+	e.Encode(currentTerm)
+	e.Encode(votedFor)
+	e.Encode(rf.log[:commitIndex+1])
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
 }
 
 func DEBUG(format string, a ...interface{}) {
@@ -153,6 +165,22 @@ func (rf *Raft) readPersist(data []byte) {
 		return
 	}
 	// Your code here (2C).
+	r := bytes.NewBuffer(data)
+	d := labgob.NewDecoder(r)
+
+	var currentTerm int
+	var votedFor int
+	var log []LogEntry
+	if d.Decode(&currentTerm) != nil || d.Decode(&votedFor) != nil || d.Decode(&log) != nil {
+		return
+	} else {
+		rf.mu.Lock()
+		rf.votedFor = votedFor
+		rf.log = log
+		rf.currentTerm = currentTerm
+		rf.mu.Unlock()
+	}
+
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := labgob.NewDecoder(r)
@@ -269,6 +297,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.lastApplied = rf.commitIndex
 	}
 	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, len(rf.log))
+	go rf.persist()
 }
 
 // the service says it has created a snapshot that has
@@ -349,6 +378,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if reply.VoteGranted {
 		fmt.Printf(" %d voteFor: %d, currentTerm: %d\n", rf.me, rf.votedFor, rf.currentTerm)
 	}
+	go rf.persist()
 }
 
 //
@@ -480,9 +510,11 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.isTimeout = false
 	rf.mu.Unlock()
 	if !flag {
+		go rf.persist()
 		return -1, -1, false
 	}
 	rf.Apply()
+	go rf.persist()
 	return index, rf.currentTerm, true
 }
 
@@ -606,6 +638,7 @@ func (rf *Raft) startElection() {
 		}
 	}
 	wg.Wait()
+	go rf.persist()
 }
 
 func (rf *Raft) heartBeat() {
@@ -618,6 +651,7 @@ func (rf *Raft) heartBeat() {
 			rf.votedFor = -1
 			rf.isTimeout = false
 			rf.mu.Unlock()
+			go rf.persist()
 			return
 		}
 		//if rf.isheartbeat {
@@ -680,6 +714,7 @@ func (rf *Raft) heartBeat() {
 		rf.mu.Unlock()
 		if flag {
 			rf.Apply()
+			go rf.persist()
 		}
 	}
 }
