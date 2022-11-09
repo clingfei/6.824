@@ -246,8 +246,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.isTimeout = false
 	}
 	fmt.Printf("%d receive from %d\n", rf.me, args.LeaderId)
-	fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d\n",
-		args.PrevLogIndex, args.PrevLogTerm, args.Term, args.LeaderCommit, len(args.Entries))
+	fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d, lastIncludedIndex: %d\n",
+		args.PrevLogIndex, args.PrevLogTerm, args.Term, args.LeaderCommit, len(args.Entries), rf.lastIncludedIndex)
 	if rf.log[len(rf.log)-1].Index < args.PrevLogIndex ||
 		(rf.log[len(rf.log)-1].Index >= args.PrevLogIndex && rf.log[args.PrevLogIndex-rf.lastIncludedIndex].Term != args.PrevLogTerm) {
 		reply.Success, reply.Term = false, rf.currentTerm
@@ -296,6 +296,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.lastApplied = rf.commitIndex
 	}
 	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, rf.log[len(rf.log)-1].Index)
+	rf.state = Follower
 	rf.persist()
 }
 
@@ -321,16 +322,23 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	// Your code here (2D).
 	var log []LogEntry
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	fmt.Printf("Snapshot: index: %d, lastIncludedIndex: %d\n", index, rf.lastIncludedIndex)
+	fmt.Printf("%d: Snapshot: index: %d, lastIncludedIndex: %d, length: %d, lastindex: %d\n",
+		rf.me, index, rf.lastIncludedIndex, len(rf.log), rf.log[len(rf.log)-1].Index)
 	//rf.lastIncludedIndex = index
-	rf.lastIncludedTerm = rf.log[index-rf.lastIncludedIndex].Term
-	// index > rf.x + len(rf.log)。那么应该全部丢弃
-	for i := index; i < len(rf.log)+rf.lastIncludedIndex; i++ {
-		log = append(log, rf.log[i-rf.lastIncludedIndex])
+	if index < rf.log[0].Index {
+		rf.mu.Unlock()
+		return
+	} else if index > rf.log[len(rf.log)-1].Index {
+		log = append(log, LogEntry{rf.currentTerm, index, nil})
+		rf.lastIncludedTerm = rf.currentTerm
+	} else {
+		rf.lastIncludedTerm = rf.log[index-rf.lastIncludedIndex].Term
+		for i := index; i < len(rf.log)+rf.lastIncludedIndex; i++ {
+			log = append(log, rf.log[i-rf.lastIncludedIndex])
+		}
+		log[0].Command = nil
 	}
 	rf.log = log
-	rf.log[0].Command = nil
 	rf.lastIncludedIndex = index
 
 	w := new(bytes.Buffer)
@@ -341,42 +349,76 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	e.Encode(rf.lastIncludedIndex)
 	e.Encode(rf.lastIncludedTerm)
 	state := w.Bytes()
+	rf.mu.Unlock()
 	// to be fixed
 	rf.persister.SaveStateAndSnapshot(state, snapshot)
 }
 
 func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapshotReply) {
+	fmt.Printf("%d receive InstallSnapshot from %d: Term: %d, lastIncludedIndex: %d, curIncludedIndex: %d\n",
+		rf.me, args.LeaderId, args.Term, args.LastIncludedIndex, rf.lastIncludedIndex)
+	var log []LogEntry
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	reply.Term = rf.currentTerm
 	if args.Term < rf.currentTerm {
+		reply.Term = rf.currentTerm
+		rf.mu.Unlock()
 		return
-	} else if args.Term > rf.currentTerm {
-		rf.currentTerm, rf.votedFor = args.Term, -1
-		rf.persist()
-	} else {
-		// how to discard any existing or partial snapshot with a smaller index?
-		// Reset state machine should in Snapshot?
-		rf.isTimeout = false
-		if args.LastIncludedIndex < rf.commitIndex {
-			return
-		}
-		rf.Snapshot(args.LastIncludedIndex, args.Data)
-		go func() {
-			applyMsg := ApplyMsg{
-				CommandValid:  false,
-				Command:       nil,
-				SnapshotValid: true,
-				Snapshot:      args.Data,
-				// to be fixed
-				SnapshotIndex: args.LastIncludedIndex,
-				SnapshotTerm:  args.LastIncludedTerm,
-			}
-			rf.applyCh <- applyMsg
-		}()
-		rf.lastApplied = args.LastIncludedIndex
-		rf.commitIndex = args.LastIncludedIndex
 	}
+	if args.Term > rf.currentTerm {
+		rf.currentTerm, rf.votedFor = args.Term, -1
+		rf.state = Follower
+		rf.persist()
+	} else if args.Term == rf.currentTerm && rf.state == Candidate {
+		rf.votedFor = -1
+		rf.state = Follower
+	}
+	reply.Term = rf.currentTerm
+	// how to discard any existing or partial snapshot with a smaller index?
+	// Reset state machine should in Snapshot?
+	rf.isTimeout = false
+	if args.LastIncludedIndex <= rf.log[0].Index {
+		rf.mu.Unlock()
+		return
+	} else if args.LastIncludedIndex > rf.log[len(rf.log)-1].Index ||
+		rf.log[args.LastIncludedIndex-rf.lastIncludedIndex].Term != args.LastIncludedTerm {
+		log = append(log, LogEntry{args.LastIncludedTerm, args.LastIncludedIndex, nil})
+		rf.lastIncludedTerm = rf.currentTerm
+	} else {
+		rf.lastIncludedTerm = rf.log[args.LastIncludedIndex-rf.lastIncludedIndex].Term
+		for i := args.LastIncludedIndex; i < len(rf.log)+rf.lastIncludedIndex; i++ {
+			log = append(log, rf.log[i-rf.lastIncludedIndex])
+		}
+		log[0].Command = nil
+	}
+	rf.log = log
+	rf.lastIncludedIndex = args.LastIncludedIndex
+
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.log)
+	e.Encode(rf.lastIncludedIndex)
+	e.Encode(rf.lastIncludedTerm)
+	state := w.Bytes()
+	rf.persister.SaveStateAndSnapshot(state, args.Data)
+	rf.mu.Unlock()
+
+	applyMsg := ApplyMsg{
+		CommandValid:  false,
+		Command:       nil,
+		SnapshotValid: true,
+		Snapshot:      args.Data,
+		// to be fixed
+		SnapshotIndex: args.LastIncludedIndex,
+		SnapshotTerm:  args.LastIncludedTerm,
+	}
+	rf.applyCh <- applyMsg
+	rf.mu.Lock()
+	rf.lastApplied = args.LastIncludedIndex
+	rf.commitIndex = args.LastIncludedIndex
+	rf.mu.Unlock()
+	fmt.Printf("InstallSnapshot: %d, lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
 }
 
 //
@@ -564,12 +606,13 @@ func (rf *Raft) BroadCast() bool {
 						rf.isTimeout = false
 						flag = false
 						rf.persist()
-						rf.mu.Unlock()
-						return
+					} else {
+						rf.matchIndex[peer] = rf.lastIncludedIndex
+						rf.nextIndex[peer] = rf.matchIndex[peer] + 1
 					}
 					rf.mu.Unlock()
 				} else {
-					fmt.Printf("lastIncludedIndex: %d\n", rf.lastIncludedIndex)
+					fmt.Printf("%d's lastIncludedIndex: %d\n", rf.me, rf.lastIncludedIndex)
 					args := &AppendEntriesArgs{
 						Term:         rf.currentTerm,
 						LeaderId:     rf.me,

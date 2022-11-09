@@ -1038,6 +1038,7 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 
 		if disconnect {
 			cfg.disconnect(victim)
+			fmt.Printf("disconnect: %d\n", victim)
 			cfg.one(rand.Int(), servers-1, true)
 		}
 		if crash {
@@ -1058,6 +1059,7 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 			// reconnect a follower, who maybe behind and
 			// needs to rceive a snapshot to catch up.
 			cfg.connect(victim)
+			fmt.Printf("connect: %d\n", victim)
 			cfg.one(rand.Int(), servers, true)
 			leader1 = cfg.checkOneLeader()
 		}
@@ -1071,14 +1073,14 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 	cfg.end()
 }
 
-func TestSnapshotBasic2D(t *testing.T) {
-	snapcommon(t, "Test (2D): snapshots basic", false, true, false)
+//func TestSnapshotBasic2D(t *testing.T) {
+//	snapcommon(t, "Test (2D): snapshots basic", false, true, false)
+//}
+
+func TestSnapshotInstall2D(t *testing.T) {
+	snapcommon(t, "Test (2D): install snapshots (disconnect)", true, true, false)
 }
 
-//func TestSnapshotInstall2D(t *testing.T) {
-//	snapcommon(t, "Test (2D): install snapshots (disconnect)", true, true, false)
-//}
-//
 //func TestSnapshotInstallUnreliable2D(t *testing.T) {
 //	snapcommon(t, "Test (2D): install snapshots (disconnect+unreliable)",
 //		true, false, false)
