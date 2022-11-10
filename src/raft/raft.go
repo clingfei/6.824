@@ -169,11 +169,11 @@ func (rf *Raft) readPersist(data []byte) {
 		return
 	} else {
 		rf.mu.Lock()
+		rf.currentTerm = currentTerm
 		rf.votedFor = votedFor
 		rf.log = log
-		rf.lastIncludedTerm = lastIncludedTerm
 		rf.lastIncludedIndex = lastIncludedIndex
-		rf.lastApplied = rf.lastIncludedIndex
+		rf.lastIncludedTerm = lastIncludedTerm
 		rf.mu.Unlock()
 	}
 
