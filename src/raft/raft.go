@@ -255,11 +255,9 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.currentTerm = args.Term
 		rf.state = Follower
 		rf.votedFor = -1
-		rf.persist()
 	} else if args.Term == rf.currentTerm && rf.state == Candidate {
 		rf.votedFor = -1
 		rf.state = Follower
-		rf.persist()
 	}
 	i := 0
 	for i < len(args.Entries) && args.Entries[i].Index < rf.log[0].Index {
@@ -293,6 +291,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.lastApplied = rf.commitIndex
 	}
 	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, rf.LastLength())
+	rf.persist()
 }
 
 type InstallSnapshotArgs struct {
@@ -323,14 +322,15 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	//rf.lastIncludedIndex = index
 	if index < rf.log[0].Index {
 		return
-	} else if index > rf.LastIndex() {
+	} else if index > rf.log[len(rf.log)-1].Index {
 		log = append(log, LogEntry{rf.currentTerm, index, nil})
 		rf.lastIncludedTerm = rf.currentTerm
 	} else {
-		rf.lastIncludedTerm = rf.GetLog(index).Term
-		for i := index; i < rf.LastLength(); i++ {
-			log = append(log, rf.GetLog(i))
+		rf.lastIncludedTerm = rf.log[index-rf.lastIncludedIndex].Term
+		for i := index; i < len(rf.log)+rf.lastIncludedIndex; i++ {
+			log = append(log, rf.log[i-rf.lastIncludedIndex])
 		}
+		log[0].Command = nil
 	}
 	rf.log = log
 	rf.lastIncludedIndex = index
@@ -652,16 +652,17 @@ func (rf *Raft) Apply() {
 	defer rf.mu.Unlock()
 	lastcommitIdx := rf.commitIndex
 	n := rf.commitIndex + 1
-	for n <= rf.LastIndex() && rf.GetLog(n).Term != rf.currentTerm {
+	for n <= rf.log[len(rf.log)-1].Index && rf.log[n-rf.lastIncludedIndex].Term != rf.currentTerm {
 		n++
 	}
 	//n := int(math.Max(float64(rf.commitIndex), float64(rf.currentLogIndex)) + 1)
 	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
-	for n <= rf.LastIndex() {
+	for n <= rf.log[len(rf.log)-1].Index {
 		counter := 1
+		fmt.Printf("n: %d\n", n)
 		for peer := range rf.peers {
 			if peer != rf.me {
-				//fmt.Printf("%d's matchIndex: %d\n", peer, rf.matchIndex[peer])
+				fmt.Printf("%d's matchIndex: %d\n", peer, rf.matchIndex[peer])
 				if rf.matchIndex[peer] >= n {
 					counter++
 				}
@@ -678,7 +679,7 @@ func (rf *Raft) Apply() {
 	for i := lastcommitIdx + 1; i <= rf.commitIndex; i++ {
 		applyMsg := ApplyMsg{
 			CommandValid:  true,
-			Command:       rf.GetLog(i).Command,
+			Command:       rf.log[i-rf.lastIncludedIndex].Command,
 			CommandIndex:  i,
 			SnapshotValid: false,
 		}
