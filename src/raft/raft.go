@@ -628,7 +628,7 @@ func (rf *Raft) BroadCast() bool {
 								rf.nextIndex[peer] = rf.matchIndex[peer]
 								rf.matchIndex[peer]--
 							} else {
-								rf.nextIndex[peer] = 1
+								rf.nextIndex[peer] = rf.lastIncludedIndex
 							}
 						}
 						rf.mu.Unlock()
@@ -879,19 +879,11 @@ func Make(peers []*labrpc.ClientEnd, me int,
 }
 
 func (rf *Raft) LastIndex() int {
-	if rf.lastIncludedIndex == 0 {
-		return len(rf.log) - 1
-	} else {
-		return rf.log[len(rf.log)-1].Index
-	}
+	return len(rf.log) - 1 + rf.lastIncludedIndex
 }
 
 func (rf *Raft) LastLength() int {
-	if rf.lastIncludedIndex == 0 {
-		return len(rf.log)
-	} else {
-		return rf.LastIndex() + 1
-	}
+	return rf.LastIndex() + 1
 }
 
 func (rf *Raft) GetLog(index int) LogEntry {
