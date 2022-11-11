@@ -1083,15 +1083,15 @@ func TestSnapshotInstall2D(t *testing.T) {
 	snapcommon(t, "Test (2D): install snapshots (disconnect)", true, true, false)
 }
 
-//func TestSnapshotInstallUnreliable2D(t *testing.T) {
-//	snapcommon(t, "Test (2D): install snapshots (disconnect+unreliable)",
-//		true, false, false)
-//}
+func TestSnapshotInstallUnreliable2D(t *testing.T) {
+	snapcommon(t, "Test (2D): install snapshots (disconnect+unreliable)",
+		true, false, false)
+}
 
-//func TestSnapshotInstallCrash2D(t *testing.T) {
-//	snapcommon(t, "Test (2D): install snapshots (crash)", false, true, true)
-//}
-//
-//func TestSnapshotInstallUnCrash2D(t *testing.T) {
-//	snapcommon(t, "Test (2D): install snapshots (unreliable+crash)", false, false, true)
-//}
+func TestSnapshotInstallCrash2D(t *testing.T) {
+	snapcommon(t, "Test (2D): install snapshots (crash)", false, true, true)
+}
+
+func TestSnapshotInstallUnCrash2D(t *testing.T) {
+	snapcommon(t, "Test (2D): install snapshots (unreliable+crash)", false, false, true)
+}

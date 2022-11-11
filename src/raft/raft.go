@@ -54,6 +54,8 @@ type ApplyMsg struct {
 	SnapshotIndex int
 }
 
+const DEBUG = false
+
 type State int
 
 const (
@@ -115,6 +117,8 @@ func (rf *Raft) GetState() (int, bool) {
 	var isleader bool
 	// Your code here (2A).
 	rf.mu.Lock()
+	DeBug("%d enter lock %d\n", rf.me, 117)
+	defer DeBug("%d quit lock %d\n", rf.me, 117)
 	defer rf.mu.Unlock()
 	Term = rf.currentTerm
 	isleader = rf.state == Leader
@@ -166,11 +170,13 @@ func (rf *Raft) readPersist(data []byte) {
 		return
 	} else {
 		rf.mu.Lock()
+		DeBug("%d enter lock %d\n", rf.me, 171)
 		rf.currentTerm = currentTerm
 		rf.votedFor = votedFor
 		rf.log = log
 		rf.lastIncludedIndex = lastIncludedIndex
 		rf.lastIncludedTerm = lastIncludedTerm
+		DeBug("%d quit lock %d\n", rf.me, 171)
 		rf.mu.Unlock()
 	}
 
@@ -188,8 +194,10 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-func DEBUG(format string, a ...interface{}) {
-	fmt.Printf(format, a...)
+func DeBug(format string, a ...interface{}) {
+	if DEBUG {
+		fmt.Printf(format, a...)
+	}
 }
 
 //
@@ -225,8 +233,8 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	// Your code here (2D).
 	var log []LogEntry
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	fmt.Printf("%d: Snapshot: index: %d, lastIncludedIndex: %d, length: %d, lastindex: %d\n",
+	DeBug("%d enter lock %d\n", rf.me, 231)
+	DeBug("%d: Snapshot: index: %d, lastIncludedIndex: %d, length: %d, lastindex: %d\n",
 		rf.me, index, rf.lastIncludedIndex, len(rf.log), rf.log[len(rf.log)-1].Index)
 	//rf.lastIncludedIndex = index
 	if index < rf.log[0].Index {
@@ -252,17 +260,21 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	e.Encode(rf.lastIncludedTerm)
 	state := w.Bytes()
 	// to be fixed
+	DeBug("%d quit lock %d\n", rf.me, 231)
+	rf.mu.Unlock()
 	rf.persister.SaveStateAndSnapshot(state, snapshot)
 }
 
 func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapshotReply) {
-	fmt.Printf("%d receive InstallSnapshot from %d: Term: %d, lastIncludedIndex: %d, curIncludedIndex: %d, length: %d\n",
+	DeBug("%d receive InstallSnapshot from %d: Term: %d, lastIncludedIndex: %d, curIncludedIndex: %d, length: %d\n",
 		rf.me, args.LeaderId, args.Term, args.LastIncludedIndex, rf.lastIncludedIndex, rf.LastLength())
 	var log []LogEntry
 	rf.mu.Lock()
+	DeBug("%d enter lock %d\n", rf.me, 269)
 	if args.Term < rf.currentTerm {
-		fmt.Printf("%d's currentTerm: %d\n", rf.me, rf.currentTerm)
+		DeBug("%d's currentTerm: %d\n", rf.me, rf.currentTerm)
 		reply.Term = rf.currentTerm
+		DeBug("%d quit lock %d\n", rf.me, 269)
 		rf.mu.Unlock()
 		return
 	}
@@ -279,7 +291,8 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 	// Reset state machine should in Snapshot?
 	rf.isTimeout = false
 	if args.LastIncludedIndex <= rf.log[0].Index {
-		fmt.Printf("curLastLogIncludedIndex: %d\n", rf.lastIncludedIndex)
+		DeBug("curLastLogIncludedIndex: %d\n", rf.lastIncludedIndex)
+		DeBug("%d quit lock %d\n", rf.me, 269)
 		rf.mu.Unlock()
 		return
 	} else if args.LastIncludedIndex > rf.LastIndex() ||
@@ -313,14 +326,16 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 		SnapshotIndex: rf.lastIncludedIndex,
 		SnapshotTerm:  rf.lastIncludedTerm,
 	}
-	rf.applyCh <- applyMsg
+	DeBug("%d quit lock %d\n", rf.me, 269)
 	rf.mu.Unlock()
+	rf.applyCh <- applyMsg
+
 	//rf.mu.Lock()
 
 	//rf.lastApplied = args.LastIncludedIndex
 	//rf.commitIndex = args.LastIncludedIndex
 
-	fmt.Printf("InstallSnapshot: %d, lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
+	DeBug("InstallSnapshot: %d, lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
 }
 
 //
@@ -358,13 +373,15 @@ type RequestVoteReply struct {
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
 	// vote for one another,
-	//fmt.Printf("candidateId: %d, Term: %d, me: %d, currentTerm: %d\n", args.CandidateId, args.Term, rf.me, rf.currentTerm)
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	fmt.Printf("%d receive RequestVote from: %d, term: %d, LastLogIndex: %d, LastLogTerm: %d, currentTerm: %d\n",
+	//DeBug("candidateId: %d, Term: %d, me: %d, currentTerm: %d\n", args.CandidateId, args.Term, rf.me, rf.currentTerm)
+	DeBug("%d receive RequestVote from: %d, term: %d, LastLogIndex: %d, LastLogTerm: %d, currentTerm: %d\n",
 		rf.me, args.CandidateId, args.Term, args.LastLogIndex, args.LastLogTerm, rf.currentTerm)
+	rf.mu.Lock()
+	defer DeBug("%d quit lock %d\n", rf.me, 374)
+	defer rf.mu.Unlock()
+	DeBug("%d enter lock %d\n", rf.me, 374)
 	if args.Term < rf.currentTerm {
-		fmt.Printf("%d receive out-dated RequestVote from: %d, term: %d, currentTerm: %d\n",
+		DeBug("%d receive out-dated RequestVote from: %d, term: %d, currentTerm: %d\n",
 			rf.me, args.CandidateId, args.Term, rf.currentTerm)
 		reply.VoteGranted = false
 		reply.Term = rf.currentTerm
@@ -382,13 +399,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		(rf.log[len(rf.log)-1].Term == args.LastLogTerm && rf.LastIndex() > args.LastLogIndex) {
 		reply.VoteGranted = false
 	} else {
-		fmt.Printf("%d's votedFor: %d\n", rf.me, rf.votedFor)
+		DeBug("%d's votedFor: %d\n", rf.me, rf.votedFor)
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateId
 		rf.isTimeout = false
 		rf.persist()
 	}
-	fmt.Printf(" %d voteFor: %d, currentTerm: %d\n", rf.me, rf.votedFor, rf.currentTerm)
+	DeBug(" %d voteFor: %d, currentTerm: %d\n", rf.me, rf.votedFor, rf.currentTerm)
 }
 
 //
@@ -463,25 +480,27 @@ type AppendEntriesReply struct {
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// 如果日志中存在prevLogIndex和prevLogTerm都相等的日志记录，那么success被设置为true
 	rf.mu.Lock()
+	DeBug("%d enter lock %d\n", rf.me, 478)
+	defer DeBug("%d quit lock %d\n", rf.me, 478)
 	defer rf.mu.Unlock()
 	if args.Term < rf.currentTerm {
-		fmt.Printf("%d receive outdated heartbeat from %d, Term: %d, currentTerm: %d\n",
+		DeBug("%d receive outdated heartbeat from %d, Term: %d, currentTerm: %d\n",
 			rf.me, args.LeaderId, args.Term, rf.currentTerm)
 		reply.Term, reply.Success = rf.currentTerm, false
 		return
 	}
 	if args.Term >= rf.currentTerm {
-		//fmt.Printf("%d reset isTimeout\n", rf.me)
+		//DeBug("%d reset isTimeout\n", rf.me)
 		rf.isTimeout = false
 	}
-	fmt.Printf("%d receive from %d\n", rf.me, args.LeaderId)
-	fmt.Printf("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d, lastIncludedIndex: %d\n",
+	DeBug("%d receive from %d\n", rf.me, args.LeaderId)
+	DeBug("PrevLogIndex: %d, PrevLogTerm: %d, Term: %d, LeaderCommit: %d, length: %d, lastIncludedIndex: %d\n",
 		args.PrevLogIndex, args.PrevLogTerm, args.Term, args.LeaderCommit, len(args.Entries), rf.lastIncludedIndex)
 	if rf.LastIndex() < args.PrevLogIndex ||
 		(args.PrevLogIndex >= rf.log[0].Index && rf.LastIndex() >= args.PrevLogIndex && rf.GetLog(args.PrevLogIndex).Term != args.PrevLogTerm) {
 		reply.Success, reply.Term = false, rf.currentTerm
-		fmt.Printf("0's Index: %d, LastIndex: %d, Getlog: %d\n", rf.log[0].Index, rf.LastIndex(), rf.GetLog(args.PrevLogIndex).Index)
-		fmt.Printf("currentLogIndex: %d, currentLogTerm: %d\n", rf.log[len(rf.log)-1].Index, rf.log[len(rf.log)-1].Term)
+		DeBug("0's Index: %d, LastIndex: %d, Getlog: %d\n", rf.log[0].Index, rf.LastIndex(), rf.GetLog(args.PrevLogIndex).Index)
+		DeBug("currentLogIndex: %d, currentLogTerm: %d\n", rf.log[len(rf.log)-1].Index, rf.log[len(rf.log)-1].Term)
 		return
 	}
 	if args.Term > rf.currentTerm {
@@ -513,17 +532,23 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = Min(args.LeaderCommit, rf.LastIndex())
 	}
-	for i := Max(rf.lastApplied, rf.lastIncludedIndex) + 1; i <= rf.commitIndex; i++ {
+	i = Max(rf.lastApplied, rf.lastIncludedIndex) + 1
+	commitIndex := rf.commitIndex
+	rf.mu.Unlock()
+	for ; i <= commitIndex; i++ {
 		var applyMsg ApplyMsg
+		rf.mu.Lock()
 		applyMsg.Command = rf.GetLog(i).Command
+		rf.mu.Unlock()
 		applyMsg.CommandIndex = i
 		applyMsg.CommandValid = true
 		rf.applyCh <- applyMsg
 	}
+	rf.mu.Lock()
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
-	fmt.Printf("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, rf.LastLength())
+	DeBug("AppendEntries %d's commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, rf.LastLength())
 	rf.persist()
 }
 
@@ -543,17 +568,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 //
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.mu.Lock()
+	DeBug("%d enter lock %d\n", rf.me, 560)
 	index := -1
 	// Your code here (2B).
 	if rf.state != Leader {
+		DeBug("%d quit lock %d\n", rf.me, 560)
 		rf.mu.Unlock()
 		return index, -1, false
 	}
-	fmt.Printf("%d is Leader, start AppendEntries\n", rf.me)
+	DeBug("%d is Leader, start AppendEntries\n", rf.me)
 	entry := LogEntry{rf.currentTerm, rf.LastLength(), command}
 	rf.log = append(rf.log, entry)
 	index = entry.Index
 	rf.persist()
+	DeBug("%d quit lock %d\n", rf.me, 560)
 	rf.mu.Unlock()
 	rf.BroadCast()
 	time.Sleep(10 * time.Millisecond)
@@ -568,11 +596,14 @@ func (rf *Raft) heartBeat() {
 	for rf.killed() == false {
 		time.Sleep(time.Millisecond * 100)
 		rf.mu.Lock()
+		DeBug("%d enter lock %d\n", rf.me, 587)
 		if rf.state != Leader {
 			rf.isTimeout = false
+			DeBug("%d quit lock %d\n", rf.me, 587)
 			rf.mu.Unlock()
 			return
 		}
+		DeBug("%d quit lock %d\n", rf.me, 587)
 		rf.mu.Unlock()
 		rf.BroadCast()
 		time.Sleep(10 * time.Millisecond)
@@ -588,6 +619,7 @@ func (rf *Raft) BroadCast() {
 		if peer != rf.me {
 			go func(peer int) {
 				rf.mu.Lock()
+				DeBug("%d enter lock %d\n", rf.me, 610)
 				if rf.nextIndex[peer] <= rf.lastIncludedIndex {
 					args := &InstallSnapshotArgs{
 						Term:              rf.currentTerm,
@@ -598,26 +630,29 @@ func (rf *Raft) BroadCast() {
 						Data:              rf.persister.snapshot,
 						Done:              true,
 					}
+					DeBug("%d enter lock %d\n", rf.me, 610)
 					rf.mu.Unlock()
 					reply := &InstallSnapshotReply{}
 					if ok := rf.sendInstallSnapshot(peer, args, reply); !ok {
 						return
 					}
 					rf.mu.Lock()
+					DeBug("%d enter lock %d\n", rf.me, 628)
 					if reply.Term > rf.currentTerm {
 						rf.state = Follower
 						rf.votedFor = -1
 						rf.isTimeout = false
 						rf.persist()
 					} else {
-						fmt.Printf("%d's length: %d\n", rf.me, rf.LastLength())
+						DeBug("%d's length: %d\n", rf.me, rf.LastLength())
 						rf.matchIndex[peer] = Max(rf.lastIncludedIndex, rf.matchIndex[peer])
 						rf.nextIndex[peer] = Max(rf.matchIndex[peer]+1, rf.nextIndex[peer])
-						fmt.Printf("%d's matchIndex: %d\n", rf.me, rf.matchIndex[peer])
+						DeBug("%d's matchIndex: %d\n", rf.me, rf.matchIndex[peer])
 					}
+					DeBug("%d quit lock %d\n", rf.me, 628)
 					rf.mu.Unlock()
 				} else {
-					fmt.Printf("%d's lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
+					DeBug("%d's lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
 					args := &AppendEntriesArgs{
 						Term:         rf.currentTerm,
 						LeaderId:     rf.me,
@@ -626,6 +661,7 @@ func (rf *Raft) BroadCast() {
 						Entries:      rf.log[rf.nextIndex[peer]-rf.lastIncludedIndex:],
 						LeaderCommit: rf.commitIndex,
 					}
+					DeBug("%d quit lock %d\n", rf.me, 610)
 					rf.mu.Unlock()
 					reply := &AppendEntriesReply{}
 					if ok := rf.sendAppendEntries(peer, args, reply); !ok {
@@ -633,13 +669,14 @@ func (rf *Raft) BroadCast() {
 					}
 					if !reply.Success {
 						rf.mu.Lock()
+						DeBug("%d enter lock %d\n", rf.me, 660)
 						if reply.Term > rf.currentTerm {
 							rf.state = Follower
 							rf.votedFor = -1
 							rf.isTimeout = false
 							rf.persist()
 						} else {
-							fmt.Printf("%d doesn't contain an entry at prevLogIndex whose term matches prevLogTerm\n", peer)
+							DeBug("%d doesn't contain an entry at prevLogIndex whose term matches prevLogTerm\n", peer)
 							if rf.matchIndex[peer] > 0 {
 								rf.nextIndex[peer] = rf.matchIndex[peer]
 								rf.matchIndex[peer]--
@@ -647,14 +684,17 @@ func (rf *Raft) BroadCast() {
 								rf.nextIndex[peer] = rf.matchIndex[peer] + 1
 							}
 						}
+						DeBug("%d quit lock %d\n", rf.me, 660)
 						rf.mu.Unlock()
 					} else {
 						rf.mu.Lock()
-						fmt.Printf("%d's length: %d\n", rf.me, rf.LastLength())
+						DeBug("%d enter lock %d\n", rf.me, 679)
+						DeBug("%d's length: %d\n", rf.me, rf.LastLength())
 						rf.matchIndex[peer] = Max(args.PrevLogIndex+len(args.Entries), rf.matchIndex[peer])
 						rf.nextIndex[peer] = Max(rf.matchIndex[peer]+1, rf.nextIndex[peer])
 						//flag = true
-						fmt.Printf("%d's matchIndex: %d\n", rf.me, rf.matchIndex[peer])
+						DeBug("%d's matchIndex: %d\n", rf.me, rf.matchIndex[peer])
+						DeBug("%d quit lock %d\n", rf.me, 679)
 						rf.mu.Unlock()
 					}
 				}
@@ -667,20 +707,21 @@ func (rf *Raft) BroadCast() {
 }
 
 func (rf *Raft) Apply() {
+	//
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	DeBug("%d enter lock %d\n", rf.me, 699)
 	lastcommitIdx := rf.commitIndex
 	n := rf.commitIndex + 1
 	//for n <= rf.LastIndex() && rf.log[n-rf.lastIncludedIndex].Term != rf.currentTerm {
 	//	n++
 	//}
-	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
+	DeBug("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
 	for n <= rf.LastIndex() {
 		counter := 1
-		fmt.Printf("n: %d\n", n)
+		DeBug("n: %d\n", n)
 		for peer := range rf.peers {
 			if peer != rf.me {
-				fmt.Printf("%d's matchIndex: %d\n", peer, rf.matchIndex[peer])
+				DeBug("%d's matchIndex: %d\n", peer, rf.matchIndex[peer])
 				if rf.matchIndex[peer] >= n {
 					counter++
 				}
@@ -693,19 +734,27 @@ func (rf *Raft) Apply() {
 			break
 		}
 	}
-	fmt.Printf("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
-	for i := lastcommitIdx + 1; i <= rf.commitIndex; i++ {
+	DeBug("%d's commitIndex is %d\n", rf.me, rf.commitIndex)
+	commitIndex := rf.commitIndex
+	DeBug("%d quit lock %d\n", rf.me, 699)
+	i := Max(lastcommitIdx, rf.lastIncludedIndex) + 1
+	rf.mu.Unlock()
+	for ; i <= commitIndex; i++ {
+		rf.mu.Lock()
 		applyMsg := ApplyMsg{
 			CommandValid:  true,
 			Command:       rf.log[i-rf.lastIncludedIndex].Command,
 			CommandIndex:  i,
 			SnapshotValid: false,
 		}
+		rf.mu.Unlock()
 		rf.applyCh <- applyMsg
 	}
+	rf.mu.Lock()
 	if rf.commitIndex > rf.lastApplied {
 		rf.lastApplied = rf.commitIndex
 	}
+	rf.mu.Unlock()
 }
 
 //
@@ -731,8 +780,9 @@ func (rf *Raft) killed() bool {
 
 // 如果收到来自新的leader的AppendEntries RPC, 那么状态切换到follower
 func (rf *Raft) startElection() {
-	fmt.Printf("%d start election\n", rf.me)
+	DeBug("%d start election\n", rf.me)
 	rf.mu.Lock()
+	DeBug("%d enter lock %d\n", rf.me, 766)
 	if rf.state == Candidate {
 		rf.currentTerm++
 		rf.votedFor = rf.me
@@ -745,26 +795,32 @@ func (rf *Raft) startElection() {
 		LastLogIndex: rf.LastIndex(),
 		LastLogTerm:  rf.log[len(rf.log)-1].Term,
 	}
+	DeBug("%d quit lock %d\n", rf.me, 766)
 	rf.mu.Unlock()
-	wg := sync.WaitGroup{}
-	wg.Add(len(rf.peers) - 1)
+	//wg := sync.WaitGroup{}
+	//wg.Add(len(rf.peers) - 1)
 	voters := 1
 	for peer := range rf.peers {
 		if peer != rf.me {
 			go func(peer int) {
-				fmt.Printf("%d send RequestVote to %d\n", rf.me, peer)
-				defer wg.Done()
+				DeBug("%d send RequestVote to %d\n", rf.me, peer)
+				//defer wg.Done()
 				rf.mu.Lock()
+				DeBug("%d enter lock %d\n", rf.me, 790)
 				if rf.state != Candidate {
+					DeBug("%d quit lock %d\n", rf.me, 790)
 					rf.mu.Unlock()
 					return
 				}
+				DeBug("%d quit lock %d\n", rf.me, 790)
 				rf.mu.Unlock()
 				reply := &RequestVoteReply{}
 				if ok := rf.sendRequestVote(peer, args, reply); !ok {
+					fmt.Println("send RequestVote no response")
 					return
 				}
 				rf.mu.Lock()
+				DeBug("%d enter lock %d\n", rf.me, 804)
 				if reply.Term > rf.currentTerm {
 					rf.currentTerm = reply.Term
 					rf.votedFor = -1
@@ -781,15 +837,17 @@ func (rf *Raft) startElection() {
 							rf.matchIndex[i] = 0
 						}
 						rf.persist()
-						fmt.Printf("%d becomes leader\n", rf.me)
+						DeBug("%d becomes leader\n", rf.me)
 						go rf.heartBeat()
 					}
 				}
+				DeBug("%d quit lock %d\n", rf.me, 804)
 				rf.mu.Unlock()
 			}(peer)
 		}
 	}
-	wg.Wait()
+	//wg.Wait()
+	time.Sleep(10 * time.Millisecond)
 }
 
 // The ticker go routine starts a new election if this peer hasn't received
@@ -806,16 +864,18 @@ func (rf *Raft) ticker() {
 		time.Sleep(time.Millisecond * time.Duration(sleepInterval))
 
 		rf.mu.Lock()
+		DeBug("%d enter lock %d\n", rf.me, 848)
 		if rf.isTimeout {
-			fmt.Printf("%d convert Candidate\n", rf.me)
+			DeBug("%d convert Candidate\n", rf.me)
 			rf.state = Candidate
 			go rf.startElection()
 		} else {
 			if rf.state == Follower {
-				fmt.Printf("%d set isTimeout to True\n", rf.me)
+				DeBug("%d set isTimeout to True\n", rf.me)
 				rf.isTimeout = true
 			}
 		}
+		DeBug("%d quit lock %d\n", rf.me, 848)
 		rf.mu.Unlock()
 	}
 }
@@ -884,7 +944,7 @@ func (rf *Raft) GetLog(index int) LogEntry {
 	if index >= rf.log[0].Index && index <= rf.LastIndex() {
 		return rf.log[index-rf.lastIncludedIndex]
 	} else {
-		fmt.Printf("Unexpected index: %d\n", index)
+		DeBug("Unexpected index: %d\n", index)
 		return LogEntry{}
 	}
 }
