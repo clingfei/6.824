@@ -8,6 +8,9 @@
     - [x] Lab 2C: persistence
     - [x] Lab 2D: log compaction
 - [ ] Lab 3: Fault-tolerant Key/Value Service
+  
+  - [ ] Lab 3A: Key/value service without snapshots
+  - [ ] Lab 3B: Key/value service with snapshots
 - [ ] Lab 4: Sharded Key/Value Service
 
 
