@@ -27,7 +27,6 @@ type Op struct {
 	Value       string
 	ClientId    int64
 	SequenceNum int64
-	TaskId      int
 }
 
 type Request struct {
@@ -46,7 +45,6 @@ type KVServer struct {
 	maxraftstate int // snapshot if log grows this big
 
 	// Your definitions here.
-	taskId   int
 	database map[string]string
 	// 用于记录已经完成的请求的响应和序列号
 	requestMap map[int64]Request
@@ -72,7 +70,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 			return
 		}
 		Command := Op{
-			"Get", args.Key, "", args.ClientId, args.SequenceNum, kv.taskId,
+			"Get", args.Key, "", args.ClientId, args.SequenceNum,
 		}
 		idx, _, isLeader := kv.rf.Start(Command)
 		if !isLeader {
@@ -80,21 +78,25 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 			kv.mu.Unlock()
 			return
 		}
-		DPrintf("Start end: idx: %d, taskId: %d\n", idx, kv.taskId)
+		DPrintf("Start end: idx: %d\n", idx)
 		//var ch chan interface{}
 		ch := make(chan interface{})
-		kv.channel[kv.taskId] = ch
+		kv.channel[idx] = ch
 		//ch, ok := kv.channel[kv.taskId]
 		//if !ok {
 		//	ch = make(chan interface{})
 		//	kv.channel[kv.taskId] = ch
 		//}
-		kv.taskId++
 		kv.mu.Unlock()
 		DPrintf("%d wait on channel\n", kv.me)
 		_ = <-ch
 		DPrintf("%d wake on channel\n", kv.me)
 		kv.mu.Lock()
+		if _, isLeader := kv.rf.GetState(); !isLeader {
+			reply.Err = ErrWrongLeader
+			kv.mu.Unlock()
+			return
+		}
 		if request := kv.requestMap[args.ClientId]; request.sequenceNum == args.SequenceNum {
 			if value, ok := kv.database[args.Key]; !ok {
 				reply.Err = ErrNoKey
@@ -108,7 +110,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 				reply.Value, reply.Err = value, OK
 			}
 		} else {
-			DPrintf("Unexpected branch: clientid: %d, sequence: %d, idx: %d\n", args.ClientId, args.SequenceNum, kv.taskId)
+			DPrintf("Unexpected branch: clientid: %d, sequence: %d\n", args.ClientId, args.SequenceNum)
 		}
 		kv.mu.Unlock()
 	}
@@ -132,7 +134,7 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 			return
 		}
 		Command := Op{
-			args.Op, args.Key, args.Value, args.ClientId, args.SequenceNum, kv.taskId,
+			args.Op, args.Key, args.Value, args.ClientId, args.SequenceNum,
 		}
 		idx, _, isLeader := kv.rf.Start(Command)
 		if !isLeader {
@@ -140,20 +142,24 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 			kv.mu.Unlock()
 			return
 		}
-		DPrintf("Start end: idx: %d, taskId: %d\n", idx, kv.taskId)
+		DPrintf("Start end: idx: %d\n", idx)
 		ch := make(chan interface{})
-		kv.channel[kv.taskId] = ch
+		kv.channel[idx] = ch
 		//ch, ok := kv.channel[kv.taskId]
 		//if !ok {
 		//	ch = make(chan interface{})
 		//	kv.channel[kv.taskId] = ch
 		//}
-		kv.taskId++
 		kv.mu.Unlock()
 		DPrintf("wait on channel\n")
 		_ = <-ch
 		DPrintf("wake on channel\n")
 		kv.mu.Lock()
+		if _, isLeader := kv.rf.GetState(); !isLeader {
+			reply.Err = ErrWrongLeader
+			kv.mu.Unlock()
+			return
+		}
 		if request := kv.requestMap[args.ClientId]; request.sequenceNum == args.SequenceNum {
 			if value, ok := kv.database[args.Key]; args.Op == "Append" && ok {
 				kv.database[args.Key] = value + args.Value
@@ -195,23 +201,19 @@ func (kv *KVServer) apply() {
 	for !kv.killed() {
 		applyMsg := <-kv.applyCh
 		command := (applyMsg.Command).(Op)
-		DPrintf("applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v, taskId: %d\n",
-			applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value, command.TaskId)
+		DPrintf("applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v\n",
+			applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
 		if applyMsg.CommandValid {
-			DPrintf("entering lock 192\n")
 			kv.mu.Lock()
-			DPrintf("enter lock 194\n")
 			request := Request{}
 			request.sequenceNum = command.SequenceNum
 			kv.requestMap[command.ClientId] = request
-			ch, ok := kv.channel[command.TaskId]
+			ch, ok := kv.channel[applyMsg.CommandIndex]
+			kv.mu.Unlock()
 			if ok {
-				DPrintf("exit lock 198\n")
 				ch <- 1
 				DPrintf("send to channel")
 			}
-			kv.mu.Unlock()
-
 		}
 	}
 }
@@ -245,7 +247,6 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 	kv.rf = raft.Make(servers, me, persister, kv.applyCh)
 
 	// You may need initialization code here.
-	kv.taskId = 0
 	kv.database = make(map[string]string)
 	kv.requestMap = make(map[int64]Request)
 	kv.channel = make(map[int]chan interface{})
