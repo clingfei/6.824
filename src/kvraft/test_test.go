@@ -548,45 +548,45 @@ func TestOnePartition3A(t *testing.T) {
 	cfg.end()
 }
 
-//func TestManyPartitionsOneClient3A(t *testing.T) {
-//	// Test: partitions, one client (3A) ...
-//	GenericTest(t, "3A", 1, 5, false, false, true, -1, false)
-//}
+func TestManyPartitionsOneClient3A(t *testing.T) {
+	// Test: partitions, one client (3A) ...
+	GenericTest(t, "3A", 1, 5, false, false, true, -1, false)
+}
 
-//func TestManyPartitionsManyClients3A(t *testing.T) {
-//	// Test: partitions, many clients (3A) ...
-//	GenericTest(t, "3A", 5, 5, false, false, true, -1, false)
-//}
-//
-//func TestPersistOneClient3A(t *testing.T) {
-//	// Test: restarts, one client (3A) ...
-//	GenericTest(t, "3A", 1, 5, false, true, false, -1, false)
-//}
-//
-//func TestPersistConcurrent3A(t *testing.T) {
-//	// Test: restarts, many clients (3A) ...
-//	GenericTest(t, "3A", 5, 5, false, true, false, -1, false)
-//}
-//
-//func TestPersistConcurrentUnreliable3A(t *testing.T) {
-//	// Test: unreliable net, restarts, many clients (3A) ...
-//	GenericTest(t, "3A", 5, 5, true, true, false, -1, false)
-//}
-//
-//func TestPersistPartition3A(t *testing.T) {
-//	// Test: restarts, partitions, many clients (3A) ...
-//	GenericTest(t, "3A", 5, 5, false, true, true, -1, false)
-//}
-//
-//func TestPersistPartitionUnreliable3A(t *testing.T) {
-//	// Test: unreliable net, restarts, partitions, many clients (3A) ...
-//	GenericTest(t, "3A", 5, 5, true, true, true, -1, false)
-//}
-//
-//func TestPersistPartitionUnreliableLinearizable3A(t *testing.T) {
-//	// Test: unreliable net, restarts, partitions, random keys, many clients (3A) ...
-//	GenericTest(t, "3A", 15, 7, true, true, true, -1, true)
-//}
+func TestManyPartitionsManyClients3A(t *testing.T) {
+	// Test: partitions, many clients (3A) ...
+	GenericTest(t, "3A", 5, 5, false, false, true, -1, false)
+}
+
+func TestPersistOneClient3A(t *testing.T) {
+	// Test: restarts, one client (3A) ...
+	GenericTest(t, "3A", 1, 5, false, true, false, -1, false)
+}
+
+func TestPersistConcurrent3A(t *testing.T) {
+	// Test: restarts, many clients (3A) ...
+	GenericTest(t, "3A", 5, 5, false, true, false, -1, false)
+}
+
+func TestPersistConcurrentUnreliable3A(t *testing.T) {
+	// Test: unreliable net, restarts, many clients (3A) ...
+	GenericTest(t, "3A", 5, 5, true, true, false, -1, false)
+}
+
+func TestPersistPartition3A(t *testing.T) {
+	// Test: restarts, partitions, many clients (3A) ...
+	GenericTest(t, "3A", 5, 5, false, true, true, -1, false)
+}
+
+func TestPersistPartitionUnreliable3A(t *testing.T) {
+	// Test: unreliable net, restarts, partitions, many clients (3A) ...
+	GenericTest(t, "3A", 5, 5, true, true, true, -1, false)
+}
+
+func TestPersistPartitionUnreliableLinearizable3A(t *testing.T) {
+	// Test: unreliable net, restarts, partitions, random keys, many clients (3A) ...
+	GenericTest(t, "3A", 15, 7, true, true, true, -1, true)
+}
 
 //
 // if one server falls behind, then rejoins, does it
