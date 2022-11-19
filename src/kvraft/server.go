@@ -30,12 +30,6 @@ type Op struct {
 	SequenceNum int64
 }
 
-type Request struct {
-	sequenceNum int64
-	Err         Err
-	Value       string
-}
-
 type KVServer struct {
 	mu      sync.Mutex
 	me      int
@@ -48,23 +42,27 @@ type KVServer struct {
 	// Your definitions here.
 	database map[string]string
 	// 用于记录已经完成的请求的响应和序列号
-	requestMap map[int64]Request
-	channel    map[int]chan Op
-	termMap    map[int]int
-	indexMap   map[int64]int
+	lastSequence map[int64]int64
+	channel      map[int]chan Op
+	termMap      map[int]int
+	indexMap     map[int64]int
 }
 
 func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 	// Your code here.
 	DPrintf("%d receive Get from %d, sequence: %d, key: %v\n", kv.me, args.ClientId, args.SequenceNum, args.Key)
+	if kv.killed() {
+		reply.Err = ErrWrongLeader
+		return
+	}
 	kv.mu.Lock()
 	if _, isLeader := kv.rf.GetState(); !isLeader {
 		reply.Err = ErrWrongLeader
 		kv.mu.Unlock()
 		return
 	} else {
-		request, ok := kv.requestMap[args.ClientId]
-		if ok && args.SequenceNum <= request.sequenceNum {
+		lastSequence, ok := kv.lastSequence[args.ClientId]
+		if ok && args.SequenceNum <= lastSequence {
 			reply.Err, reply.Value = OK, kv.database[args.Key]
 			kv.mu.Unlock()
 			return
@@ -72,51 +70,52 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		Command := Op{
 			"Get", args.Key, "", args.ClientId, args.SequenceNum,
 		}
+		kv.mu.Unlock()
 		idx, term, isLeader := kv.rf.Start(Command)
 		if !isLeader {
 			reply.Err = ErrWrongLeader
-			kv.mu.Unlock()
 			return
 		}
-		DPrintf("Start end: idx: %d\n", idx)
-		ch := make(chan Op)
-		if _, ok := kv.channel[idx]; !ok {
-			kv.channel[idx] = ch
-		} else {
-			kv.mu.Unlock()
-			return
-			//ch = kv.channel[idx]
+		kv.mu.Lock()
+		ch, ok := kv.channel[idx]
+		if !ok {
+			kv.channel[idx] = make(chan Op, 1)
+			ch = kv.channel[idx]
 		}
 		kv.mu.Unlock()
-		DPrintf("%d wait on channel\n", kv.me)
+		DPrintf("%d wait on channel %d\n", kv.me, idx)
 		select {
 		case applyCommand := <-ch:
 			{
-				DPrintf("%d wake on channel\n", kv.me)
+				DPrintf("%d wake on channel %d\n", kv.me, idx)
 				kv.mu.Lock()
 				if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
 					if value, ok := kv.database[args.Key]; !ok {
 						reply.Err = ErrNoKey
-						kv.requestMap[args.ClientId] = Request{
-							sequenceNum: args.SequenceNum, Value: value, Err: ErrNoKey,
-						}
+						kv.lastSequence[args.ClientId] = args.SequenceNum
 					} else {
-						kv.requestMap[args.ClientId] = Request{
-							sequenceNum: args.SequenceNum, Value: value, Err: OK,
-						}
+						kv.lastSequence[args.ClientId] = args.SequenceNum
 						reply.Value, reply.Err = value, OK
 					}
 				} else {
 					reply.Err = ErrWrongLeader
 				}
+				DPrintf("delete channel %d\n", idx)
 				delete(kv.channel, idx)
 				kv.mu.Unlock()
 				break
 			}
 		case <-time.After(500 * time.Millisecond):
 			{
-				reply.Err = ErrWrongLeader
 				kv.mu.Lock()
+				_, isLeader = kv.rf.GetState()
+				lastSequence, ok := kv.lastSequence[args.ClientId]
+				if isLeader && ok && args.SequenceNum <= lastSequence {
+					reply.Err, reply.Value = OK, kv.database[args.Key]
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				DPrintf("%d delete channel %d\n", kv.me, idx)
 				delete(kv.channel, idx)
 				kv.mu.Unlock()
 				break
@@ -129,13 +128,17 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 	DPrintf("%d receive PutAppend: clientid: %d, sequence: %d, Op: %v, Key: %v, Value: %v\n", kv.me, args.ClientId, args.SequenceNum, args.Op, args.Key, args.Value)
 	// Your code here.
+	if kv.killed() {
+		reply.Err = ErrWrongLeader
+		return
+	}
 	kv.mu.Lock()
 	if _, isLeader := kv.rf.GetState(); !isLeader {
 		reply.Err = ErrWrongLeader
 		kv.mu.Unlock()
 		return
 	} else {
-		if request, ok := kv.requestMap[args.ClientId]; ok && args.SequenceNum <= request.sequenceNum {
+		if lastSequence, ok := kv.lastSequence[args.ClientId]; ok && args.SequenceNum <= lastSequence {
 			reply.Err = OK
 			kv.mu.Unlock()
 			return
@@ -143,44 +146,49 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 		Command := Op{
 			args.Op, args.Key, args.Value, args.ClientId, args.SequenceNum,
 		}
+		kv.mu.Unlock()
 		idx, term, isLeader := kv.rf.Start(Command)
 		if !isLeader {
 			reply.Err = ErrWrongLeader
-			kv.mu.Unlock()
 			return
 		}
-		DPrintf("Start end: idx: %d\n", idx)
-		ch := make(chan Op)
-		if _, ok := kv.channel[idx]; !ok {
-			kv.channel[idx] = ch
-		} else {
-			//ch = kv.channel[idx]
-			kv.mu.Unlock()
-			return
+		kv.mu.Lock()
+		ch, ok := kv.channel[idx]
+		if !ok {
+			kv.channel[idx] = make(chan Op, 1)
+			ch = kv.channel[idx]
 		}
 		kv.mu.Unlock()
-		DPrintf("wait on channel\n")
+		DPrintf("%d wait on channel %d\n", kv.me, idx)
 		select {
+		case <-time.After(500 * time.Millisecond):
+			{
+				kv.mu.Lock()
+				_, isLeader := kv.rf.GetState()
+				lastSequence, ok := kv.lastSequence[args.ClientId]
+				if isLeader && ok && args.SequenceNum <= lastSequence {
+					reply.Err = OK
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				DPrintf("outdated %d delete channel %d\n", kv.me, idx)
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
+				break
+			}
 		case applyCommand := <-ch:
 			{
-				DPrintf("wake on channel\n")
+				DPrintf("%d wake on channel %d\n", kv.me, idx)
 				kv.mu.Lock()
 				if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
 					reply.Err = OK
 				} else {
 					reply.Err = ErrWrongLeader
 				}
+				DPrintf("%d delete channel %d\n", kv.me, idx)
 				delete(kv.channel, idx)
 				kv.mu.Unlock()
 				break
-			}
-		case <-time.After(500 * time.Millisecond):
-			{
-				reply.Err = ErrWrongLeader
-				kv.mu.Lock()
-				delete(kv.channel, idx)
-				kv.mu.Unlock()
-				return
 			}
 		}
 	}
@@ -216,33 +224,36 @@ func (kv *KVServer) apply() {
 			applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
 		kv.mu.Lock()
 		if applyMsg.CommandValid {
-			request, ok := kv.requestMap[command.ClientId]
+			lastSequence, ok := kv.lastSequence[command.ClientId]
 			if command.Operator == "Put" {
-				if !ok || request.sequenceNum < command.SequenceNum {
+				if !ok || lastSequence < command.SequenceNum {
 					kv.database[command.Key] = command.Value
-					req := Request{Err: OK, sequenceNum: command.SequenceNum, Value: ""}
-					kv.requestMap[command.ClientId] = req
+					kv.lastSequence[command.ClientId] = command.SequenceNum
 				}
 			} else if command.Operator == "Append" {
-				if !ok || request.sequenceNum < command.SequenceNum {
+				if !ok || lastSequence < command.SequenceNum {
 					value, ok := kv.database[command.Key]
 					if !ok {
 						kv.database[command.Key] = command.Value
 					} else {
 						kv.database[command.Key] = value + command.Value
 					}
-					req := Request{Err: OK, sequenceNum: command.SequenceNum, Value: ""}
-					kv.requestMap[command.ClientId] = req
+					kv.lastSequence[command.ClientId] = command.SequenceNum
 				}
 			}
+			DPrintf("CommandIndex: %d\n", applyMsg.CommandIndex)
 			ch, ok := kv.channel[applyMsg.CommandIndex]
 			kv.termMap[applyMsg.CommandIndex] = applyMsg.CommandTerm
 			if ok {
+				kv.mu.Unlock()
 				ch <- command
-				DPrintf("send to channel")
+				DPrintf("%d send to channel %d\n", kv.me, applyMsg.CommandIndex)
+			} else {
+				kv.mu.Unlock()
+				DPrintf("%d cannot find channel %d\n", kv.me, applyMsg.CommandIndex)
 			}
 		}
-		kv.mu.Unlock()
+		//kv.mu.Unlock()
 	}
 }
 
@@ -276,7 +287,7 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 
 	// You may need initialization code here.
 	kv.database = make(map[string]string)
-	kv.requestMap = make(map[int64]Request)
+	kv.lastSequence = make(map[int64]int64)
 	kv.channel = make(map[int]chan Op)
 	kv.termMap = make(map[int]int)
 	kv.indexMap = make(map[int64]int)
