@@ -4,6 +4,7 @@ import (
 	"6.824/labgob"
 	"6.824/labrpc"
 	"6.824/raft"
+	"bytes"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -44,8 +45,9 @@ type KVServer struct {
 	// 用于记录已经完成的请求的响应和序列号
 	lastSequence map[int64]int64
 	channel      map[int]chan Op
-	//termMap      map[int]int
-	indexMap map[int64]int
+	//termMap           map[int]int
+	indexMap          map[int64]int
+	snapshotLastIndex int
 }
 
 func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
@@ -221,11 +223,11 @@ func (kv *KVServer) killed() bool {
 func (kv *KVServer) apply() {
 	for !kv.killed() {
 		applyMsg := <-kv.applyCh
-		command := (applyMsg.Command).(Op)
-		DPrintf("applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v\n",
-			applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
-		kv.mu.Lock()
 		if applyMsg.CommandValid {
+			command := (applyMsg.Command).(Op)
+			DPrintf("applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v\n",
+				applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
+			kv.mu.Lock()
 			lastSequence, ok := kv.lastSequence[command.ClientId]
 			if command.Operator == "Put" {
 				if !ok || lastSequence < command.SequenceNum {
@@ -254,8 +256,61 @@ func (kv *KVServer) apply() {
 				kv.mu.Unlock()
 				DPrintf("%d cannot find channel %d\n", kv.me, applyMsg.CommandIndex)
 			}
+			// 判断是否需要Snapshot
+			if kv.maxraftstate != -1 {
+				kv.mu.Lock()
+				if kv.rf.Persister.RaftStateSize() >= kv.maxraftstate {
+					kv.snapshotLastIndex = applyMsg.CommandIndex
+					kv.StartSnapshot()
+				}
+				kv.mu.Unlock()
+			}
+		} else {
+			snapshot := applyMsg.Snapshot
+			kv.mu.Lock()
+			kv.RestoreFromSnapshot(snapshot)
+			kv.snapshotLastIndex = applyMsg.SnapshotIndex
+			kv.CleanChannel()
+			kv.mu.Unlock()
 		}
 		//kv.mu.Unlock()
+	}
+}
+
+func (kv *KVServer) CleanChannel() {
+	for idx := range kv.channel {
+		// 说明之前的idx的操作已经在leader上完成了，这些channel都可以删除
+		if idx <= kv.snapshotLastIndex {
+			delete(kv.channel, idx)
+		}
+	}
+}
+
+func (kv *KVServer) StartSnapshot() {
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(kv.database)
+	e.Encode(kv.lastSequence)
+	e.Encode(kv.snapshotLastIndex)
+	data := w.Bytes()
+	kv.rf.Snapshot(kv.snapshotLastIndex, data)
+}
+
+func (kv *KVServer) RestoreFromSnapshot(snapshot []byte) {
+	if snapshot == nil || len(snapshot) < 1 {
+		return
+	}
+	r := bytes.NewBuffer(snapshot)
+	d := labgob.NewDecoder(r)
+	var database map[string]string
+	var lastSequence map[int64]int64
+	var snapshotLastIndex int
+	if d.Decode(&database) != nil || d.Decode(&lastSequence) != nil || d.Decode(&snapshotLastIndex) != nil {
+		DPrintf("ReadSnapshot failed\n")
+	} else {
+		kv.database = database
+		kv.lastSequence = lastSequence
+		kv.snapshotLastIndex = snapshotLastIndex
 	}
 }
 
@@ -286,13 +341,20 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 
 	kv.applyCh = make(chan raft.ApplyMsg)
 	kv.rf = raft.Make(servers, me, persister, kv.applyCh)
-
 	// You may need initialization code here.
 	kv.database = make(map[string]string)
 	kv.lastSequence = make(map[int64]int64)
 	kv.channel = make(map[int]chan Op)
 	//kv.termMap = make(map[int]int)
 	kv.indexMap = make(map[int64]int)
+	kv.snapshotLastIndex = 0
+
+	snapshot := persister.ReadSnapshot()
+	if len(snapshot) >= 0 {
+		kv.mu.Lock()
+		kv.RestoreFromSnapshot(snapshot)
+		kv.mu.Unlock()
+	}
 	go kv.apply()
 	return kv
 }
@@ -305,3 +367,7 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 
 // 每个Start的请求创建一个新的协程以将处理协程阻塞，
 // 那么这些管道是否需要复制? 可能某些服务器上没有创建channel？channel应该是仅在leader上创建的，因此应当将channel作为Op的参数来复制？
+
+// 如果maxraftstate == -1,不需要snapshot
+// 如果persister.RaftStateSize() >= maxraftstate，则调用Snapshot()
+// 哪些属性需要Snapshot？
