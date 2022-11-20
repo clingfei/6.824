@@ -44,8 +44,8 @@ type KVServer struct {
 	// 用于记录已经完成的请求的响应和序列号
 	lastSequence map[int64]int64
 	channel      map[int]chan Op
-	termMap      map[int]int
-	indexMap     map[int64]int
+	//termMap      map[int]int
+	indexMap map[int64]int
 }
 
 func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
@@ -71,7 +71,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 			"Get", args.Key, "", args.ClientId, args.SequenceNum,
 		}
 		kv.mu.Unlock()
-		idx, term, isLeader := kv.rf.Start(Command)
+		idx, _, isLeader := kv.rf.Start(Command)
 		if !isLeader {
 			reply.Err = ErrWrongLeader
 			return
@@ -89,7 +89,8 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 			{
 				DPrintf("%d wake on channel %d\n", kv.me, idx)
 				kv.mu.Lock()
-				if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
+				//if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
+				if applyCommand.SequenceNum == args.SequenceNum {
 					if value, ok := kv.database[args.Key]; !ok {
 						reply.Err = ErrNoKey
 						kv.lastSequence[args.ClientId] = args.SequenceNum
@@ -147,7 +148,7 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 			args.Op, args.Key, args.Value, args.ClientId, args.SequenceNum,
 		}
 		kv.mu.Unlock()
-		idx, term, isLeader := kv.rf.Start(Command)
+		idx, _, isLeader := kv.rf.Start(Command)
 		if !isLeader {
 			reply.Err = ErrWrongLeader
 			return
@@ -180,7 +181,8 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 			{
 				DPrintf("%d wake on channel %d\n", kv.me, idx)
 				kv.mu.Lock()
-				if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
+				//if applyCommand.SequenceNum == args.SequenceNum && term == kv.termMap[idx] {
+				if applyCommand.SequenceNum == args.SequenceNum {
 					reply.Err = OK
 				} else {
 					reply.Err = ErrWrongLeader
@@ -243,7 +245,7 @@ func (kv *KVServer) apply() {
 			}
 			DPrintf("CommandIndex: %d\n", applyMsg.CommandIndex)
 			ch, ok := kv.channel[applyMsg.CommandIndex]
-			kv.termMap[applyMsg.CommandIndex] = applyMsg.CommandTerm
+			//kv.termMap[applyMsg.CommandIndex] = applyMsg.CommandTerm
 			if ok {
 				kv.mu.Unlock()
 				ch <- command
@@ -289,7 +291,7 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 	kv.database = make(map[string]string)
 	kv.lastSequence = make(map[int64]int64)
 	kv.channel = make(map[int]chan Op)
-	kv.termMap = make(map[int]int)
+	//kv.termMap = make(map[int]int)
 	kv.indexMap = make(map[int64]int)
 	go kv.apply()
 	return kv
