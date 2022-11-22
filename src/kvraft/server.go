@@ -224,10 +224,12 @@ func (kv *KVServer) apply() {
 	for !kv.killed() {
 		applyMsg := <-kv.applyCh
 		if applyMsg.CommandValid {
+			DPrintf("applyMsg: Snapshot: %v, %d, Command: %v, %d\n",
+				applyMsg.SnapshotValid, applyMsg.SnapshotIndex, applyMsg.CommandValid, applyMsg.CommandIndex)
 			command := (applyMsg.Command).(Op)
-			DPrintf("applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v\n",
-				applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
 			kv.mu.Lock()
+			DPrintf("S[%d] applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v\n",
+				kv.me, applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value)
 			lastSequence, ok := kv.lastSequence[command.ClientId]
 			if command.Operator == "Put" {
 				if !ok || lastSequence < command.SequenceNum {
@@ -248,12 +250,11 @@ func (kv *KVServer) apply() {
 			DPrintf("CommandIndex: %d\n", applyMsg.CommandIndex)
 			ch, ok := kv.channel[applyMsg.CommandIndex]
 			//kv.termMap[applyMsg.CommandIndex] = applyMsg.CommandTerm
+			kv.mu.Unlock()
 			if ok {
-				kv.mu.Unlock()
 				ch <- command
 				DPrintf("%d send to channel %d\n", kv.me, applyMsg.CommandIndex)
 			} else {
-				kv.mu.Unlock()
 				DPrintf("%d cannot find channel %d\n", kv.me, applyMsg.CommandIndex)
 			}
 			// 判断是否需要Snapshot

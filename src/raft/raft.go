@@ -175,6 +175,7 @@ func (rf *Raft) readPersist(data []byte) {
 		rf.log = log
 		rf.lastIncludedIndex = lastIncludedIndex
 		rf.lastIncludedTerm = lastIncludedTerm
+		rf.commitIndex = rf.lastIncludedIndex
 		//DPrintf("%d quit lock %d\n", rf.me, 171)
 		rf.mu.Unlock()
 	}
@@ -259,13 +260,13 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 }
 
 func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapshotReply) {
-	DPrintf("%d receive InstallSnapshot from %d: Term: %d, lastIncludedIndex: %d, curIncludedIndex: %d, length: %d\n",
+	DPrintf("F[%d] receive InstallSnapshot from %d: Term: %d, lastIncludedIndex: %d, curIncludedIndex: %d, length: %d\n",
 		rf.me, args.LeaderId, args.Term, args.LastIncludedIndex, rf.lastIncludedIndex, rf.LastLength())
 	var log []LogEntry
 	rf.mu.Lock()
 	//DPrintf("%d enter lock %d\n", rf.me, 269)
 	if args.Term < rf.currentTerm {
-		DPrintf("%d's currentTerm: %d\n", rf.me, rf.currentTerm)
+		DPrintf("F[%d]'s currentTerm: %d\n", rf.me, rf.currentTerm)
 		reply.Term = rf.currentTerm
 		//DPrintf("%d quit lock %d\n", rf.me, 269)
 		rf.mu.Unlock()
@@ -296,6 +297,7 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 			log = append(log, rf.log[i-rf.lastIncludedIndex])
 		}
 		log[0].Term = args.LastIncludedTerm
+		log[0].Command = nil
 	}
 	rf.log = log
 	rf.lastIncludedIndex = args.LastIncludedIndex
@@ -319,12 +321,14 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 		SnapshotIndex: rf.lastIncludedIndex,
 		SnapshotTerm:  rf.lastIncludedTerm,
 	}
-	rf.lastApplied = rf.lastIncludedIndex
+	rf.commitIndex = applyMsg.SnapshotIndex
+	DPrintf("F[%d]'s commitIndex change to %d\n", rf.me, rf.commitIndex)
+	rf.lastApplied = rf.commitIndex
 	DPrintf("F[%d] apply Snapshot: %d\n", rf.me, applyMsg.SnapshotIndex)
 	//DPrintf("%d quit lock %d\n", rf.me, 269)
 	rf.mu.Unlock()
 	rf.applyCh <- applyMsg
-	DPrintf("InstallSnapshot: %d, lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
+	DPrintf("InstallSnapshot: F[%d], lastIncludedIndex: %d, commitIndex: %d\n", rf.me, rf.lastIncludedIndex, rf.commitIndex)
 }
 
 //
@@ -618,8 +622,8 @@ func (rf *Raft) BroadCast() {
 					//DPrintf("%d quit lock %d\n", rf.me, 628)
 					rf.mu.Unlock()
 				} else {
-					DPrintf("L[%d]'s lastIncludedIndex: %d, commitIndex: %d, F[%d]'s nextIndex: %d\n",
-						rf.me, rf.lastIncludedIndex, rf.commitIndex, peer, rf.nextIndex[peer])
+					DPrintf("L[%d]'s lastIncludedIndex: %d, commitIndex: %d, F[%d]'s nextIndex: %d, L[%d]'s length: %d\n",
+						rf.me, rf.lastIncludedIndex, rf.commitIndex, peer, rf.nextIndex[peer], rf.me, rf.LastLength())
 					args := &AppendEntriesArgs{
 						Term:         rf.currentTerm,
 						LeaderId:     rf.me,
@@ -698,22 +702,37 @@ func (rf *Raft) UpdateCommitIndex() {
 func (rf *Raft) Apply() {
 	for !rf.killed() {
 		rf.mu.Lock()
-		if rf.commitIndex > rf.lastApplied {
-			for i := Max(rf.lastIncludedIndex, rf.lastApplied) + 1; i <= rf.commitIndex; i++ {
-				applyMsg := ApplyMsg{
-					CommandValid:  true,
-					Command:       rf.GetLog(i).Command,
-					CommandIndex:  i,
-					SnapshotValid: false,
-				}
-				rf.mu.Unlock()
-				DPrintf("L[%d] start commit: %d, commitIndex: %d, command: %v\n", rf.me, i, rf.commitIndex, applyMsg.Command)
-				rf.applyCh <- applyMsg
-				DPrintf("L[%d] apply log: %d, command: %d\n", rf.me, i, applyMsg.Command)
-				rf.mu.Lock()
+		i := Max(rf.lastIncludedIndex, rf.lastApplied) + 1
+		if i <= rf.commitIndex {
+			applyMsg := ApplyMsg{
+				CommandValid:  true,
+				Command:       rf.GetLog(i).Command,
+				CommandIndex:  i,
+				SnapshotValid: false,
 			}
-			rf.lastApplied = rf.commitIndex
+			rf.mu.Unlock()
+			rf.applyCh <- applyMsg
+			rf.mu.Lock()
+			rf.lastApplied = i
 		}
+		//if rf.commitIndex > rf.lastApplied {
+		//	DPrintf("S[%d]'s lastIncludedIndex: %d, lastApplied: %d\n", rf.me, rf.lastIncludedIndex, rf.lastApplied)
+		//	for i := Max(rf.lastIncludedIndex, rf.lastApplied) + 1; i <= rf.commitIndex; i++ {
+		//		applyMsg := ApplyMsg{
+		//			CommandValid:  true,
+		//			Command:       rf.GetLog(i).Command,
+		//			CommandIndex:  i,
+		//			SnapshotValid: false,
+		//		}
+		//		rf.mu.Unlock()
+		//		DPrintf("L[%d] start commit: %d, commitIndex: %d, command: %v, lastIndex: %d\n",
+		//			rf.me, i, rf.commitIndex, applyMsg.Command, rf.LastIndex())
+		//		rf.applyCh <- applyMsg
+		//		DPrintf("L[%d] apply log: %d, command: %d\n", rf.me, i, applyMsg.Command)
+		//		rf.mu.Lock()
+		//	}
+		//	rf.lastApplied = rf.commitIndex
+		//}
 		block := rf.lastApplied == rf.commitIndex
 		rf.mu.Unlock()
 		if block {
