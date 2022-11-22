@@ -381,6 +381,7 @@ func TestMulti(t *testing.T) {
 
 	fmt.Printf("Test: Check Same config on servers ...\n")
 
+	Debug("Check Same config on servers ...\n")
 	isLeader, leader := cfg.Leader()
 	if !isLeader {
 		t.Fatalf("Leader not found")
@@ -388,7 +389,7 @@ func TestMulti(t *testing.T) {
 	c := ck.Query(-1) // Config leader claims
 
 	cfg.ShutdownServer(leader)
-
+	Debug("configs: %v\n", c)
 	attempts := 0
 	for isLeader, leader = cfg.Leader(); isLeader; time.Sleep(1 * time.Second) {
 		if attempts++; attempts >= 3 {
@@ -397,6 +398,7 @@ func TestMulti(t *testing.T) {
 	}
 
 	c1 = ck.Query(-1)
+	Debug("configs: %v\n", c1)
 	check_same_config(t, c, c1)
 
 	fmt.Printf("  ... Passed\n")

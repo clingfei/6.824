@@ -10,8 +10,11 @@
 - [ ] Lab 3: Fault-tolerant Key/Value Service
   
   - [x] Lab 3A: Key/value service without snapshots
-  - [ ] Lab 3B: Key/value service with snapshots
+  - [x] Lab 3B: Key/value service with snapshots
 - [ ] Lab 4: Sharded Key/Value Service
+
+  - [x] Lab 4A: The Shard controller
+  - [ ] Lab 4B: Sharded Key/Value Server
 
 
 

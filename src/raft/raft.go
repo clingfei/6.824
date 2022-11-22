@@ -96,7 +96,8 @@ type Raft struct {
 	// 这样可以降低系统的复杂度
 	isTimeout bool
 
-	applyCh chan ApplyMsg
+	applyCh   chan ApplyMsg
+	applyCond sync.Cond
 }
 
 // each entry contains command for state machine, and Term when entry was received by leader, first index is 1
@@ -520,20 +521,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = Min(args.LeaderCommit, rf.LastIndex())
 	}
-	DPrintf("F[%d]'s commitIndex: %d\n", rf.me, rf.commitIndex)
-	for i = Max(rf.lastApplied, rf.lastIncludedIndex) + 1; i <= rf.commitIndex; i++ {
-		var applyMsg ApplyMsg
-		applyMsg.Command = rf.GetLog(i).Command
-		applyMsg.CommandIndex = i
-		applyMsg.CommandValid = true
-		DPrintf("F[%d] apply log: %d, command: %d\n", rf.me, i, applyMsg.Command)
-		rf.mu.Unlock()
-		rf.applyCh <- applyMsg
-		rf.mu.Lock()
-	}
-	if rf.commitIndex > rf.lastApplied {
-		rf.lastApplied = rf.commitIndex
-	}
+	rf.applyCond.Signal()
 	DPrintf("F[%d]'s commitIndex is %d, length is %d\n", rf.me, rf.commitIndex, rf.LastLength())
 	rf.persist()
 }
@@ -593,7 +581,6 @@ func (rf *Raft) heartBeat() {
 }
 
 func (rf *Raft) BroadCast() {
-	flag := false
 	for peer := range rf.peers {
 		if peer != rf.me {
 			go func(peer int) {
@@ -673,7 +660,6 @@ func (rf *Raft) BroadCast() {
 						DPrintf("L[%d]'s length: %d\n", rf.me, rf.LastLength())
 						rf.matchIndex[peer] = Max(args.PrevLogIndex+len(args.Entries), rf.matchIndex[peer])
 						rf.nextIndex[peer] = Max(rf.matchIndex[peer]+1, rf.nextIndex[peer])
-						flag = true
 						DPrintf("F[%d]'s matchIndex: %d, nextIndex: %d\n", peer, rf.matchIndex[peer], rf.nextIndex[peer])
 						//DPrintf("%d quit lock %d\n", rf.me, 679)
 						rf.mu.Unlock()
@@ -683,14 +669,13 @@ func (rf *Raft) BroadCast() {
 		}
 	}
 	time.Sleep(10 * time.Millisecond)
-	if flag {
-		go rf.Apply()
-	}
+	rf.UpdateCommitIndex()
 }
 
-func (rf *Raft) Apply() {
+func (rf *Raft) UpdateCommitIndex() {
 	rf.mu.Lock()
 	//DPrintf("%d enter lock %d\n", rf.me, 699)
+	lastCommitIndex := rf.commitIndex
 	matchIndex := make([]int, len(rf.peers))
 	copy(matchIndex, rf.matchIndex)
 	matchIndex[rf.me] = rf.LastIndex()
@@ -704,25 +689,39 @@ func (rf *Raft) Apply() {
 	if n > rf.commitIndex && rf.GetLog(n).Term == rf.currentTerm {
 		rf.commitIndex = n
 	}
-	for i := Max(rf.lastApplied, rf.lastIncludedIndex) + 1; i <= rf.commitIndex; i++ {
-		DPrintf("L[%d] start commit: %d\n", rf.me, i)
-		applyMsg := ApplyMsg{
-			CommandValid:  true,
-			Command:       rf.GetLog(i).Command,
-			CommandIndex:  i,
-			SnapshotValid: false,
-		}
-		rf.mu.Unlock()
-		DPrintf("L[%d] apply log: %d, command: %d\n", rf.me, i, applyMsg.Command)
-		rf.applyCh <- applyMsg
-		rf.mu.Lock()
+	if rf.commitIndex > lastCommitIndex {
+		rf.applyCond.Signal()
 	}
-	if rf.commitIndex > rf.lastApplied {
-		rf.lastApplied = rf.commitIndex
-	}
-	DPrintf("L[%d]'s commitIndex is %d\n", rf.me, rf.commitIndex)
-	//DPrintf("%d quit lock %d\n", rf.me, 699)
 	rf.mu.Unlock()
+}
+
+func (rf *Raft) Apply() {
+	for !rf.killed() {
+		rf.mu.Lock()
+		if rf.commitIndex > rf.lastApplied {
+			for i := Max(rf.lastIncludedIndex, rf.lastApplied) + 1; i <= rf.commitIndex; i++ {
+				applyMsg := ApplyMsg{
+					CommandValid:  true,
+					Command:       rf.GetLog(i).Command,
+					CommandIndex:  i,
+					SnapshotValid: false,
+				}
+				rf.mu.Unlock()
+				DPrintf("L[%d] start commit: %d, commitIndex: %d, command: %v\n", rf.me, i, rf.commitIndex, applyMsg.Command)
+				rf.applyCh <- applyMsg
+				DPrintf("L[%d] apply log: %d, command: %d\n", rf.me, i, applyMsg.Command)
+				rf.mu.Lock()
+			}
+			rf.lastApplied = rf.commitIndex
+		}
+		block := rf.lastApplied == rf.commitIndex
+		rf.mu.Unlock()
+		if block {
+			rf.applyCond.L.Lock()
+			rf.applyCond.Wait()
+			rf.applyCond.L.Unlock()
+		}
+	}
 }
 
 //
@@ -878,6 +877,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.lastIncludedIndex = 0
 	rf.lastIncludedTerm = 0
 	rf.applyCh = applyCh
+	rf.applyCond = sync.Cond{L: &sync.Mutex{}}
 
 	for i := 0; i < len(peers); i++ {
 		rf.matchIndex[i] = 0
@@ -895,6 +895,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	// start ticker goroutine to start elections
 	go rf.ticker()
+	go rf.Apply()
 
 	return rf
 }
