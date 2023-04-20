@@ -55,6 +55,7 @@ func (ck *Clerk) Get(key string) string {
 			var reply GetReply
 			ok := srv.Call("KVServer.Get", args, &reply)
 			if ok && reply.Err != ErrWrongLeader {
+				DPrintf("C[%d]'s Get sed[%d] receive response\n", ck.me, ck.sequenceId)
 				return reply.Value
 			}
 		}

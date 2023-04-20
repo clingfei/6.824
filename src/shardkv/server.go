@@ -1,17 +1,28 @@
 package shardkv
 
-
-import "6.824/labrpc"
+import (
+	"6.824/labrpc"
+	"sync/atomic"
+	"time"
+)
 import "6.824/raft"
 import "sync"
 import "6.824/labgob"
-
-
 
 type Op struct {
 	// Your definitions here.
 	// Field names must start with capital letters,
 	// otherwise RPC will break.
+	Operator    string
+	Key         string
+	Value       string
+	ClientId    int64
+	SequenceNum int64
+}
+
+type Notify struct {
+	sequenceNum int64
+	term        int
 }
 
 type ShardKV struct {
@@ -25,15 +36,116 @@ type ShardKV struct {
 	maxraftstate int // snapshot if log grows this big
 
 	// Your definitions here.
+	lastSequence map[int64]int64
+	database     map[string]string
+	channel      map[int]chan Notify
+	indexMap     map[int64]int
+	dead         int32
 }
-
 
 func (kv *ShardKV) Get(args *GetArgs, reply *GetReply) {
 	// Your code here.
+	command := Op{"Get", args.Key, "", args.ClientId, args.SequenceId}
+	reply.Err = kv.ApplyCommand(args.ClientId, args.SequenceId, command)
+	kv.mu.Lock()
+	if reply.Err == OK {
+		if value, ok := kv.database[args.Key]; ok {
+			reply.Value = value
+		} else {
+			reply.Err = ErrNoKey
+		}
+	}
+	kv.mu.Unlock()
 }
 
 func (kv *ShardKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 	// Your code here.
+}
+
+func (kv *ShardKV) ApplyCommand(clientId, sequence int64, command Op) (Err Err) {
+	kv.mu.Lock()
+	if _, isLeader := kv.rf.GetState(); !isLeader {
+		kv.mu.Unlock()
+		Err = ErrWrongLeader
+	} else {
+		lastSequence, ok := kv.lastSequence[clientId]
+		if ok && lastSequence >= sequence {
+			Err = OK
+			kv.mu.Unlock()
+			return
+		}
+		kv.mu.Unlock()
+		idx, term, isLeader := kv.rf.Start(command)
+		if !isLeader {
+			Err = ErrWrongLeader
+			return
+		}
+		kv.mu.Lock()
+		ch, ok := kv.channel[idx]
+		if !ok {
+			ch = make(chan Notify, 1)
+			kv.channel[idx] = ch
+		}
+		kv.mu.Unlock()
+		select {
+		case notify := <-ch:
+			{
+				if notify.sequenceNum != sequence || term != notify.term {
+					Err = ErrWrongLeader
+				} else {
+					Err = OK
+				}
+				break
+			}
+		case <-time.After(500 * time.Millisecond):
+			{
+				_, isLeader := kv.rf.GetState()
+				if !isLeader {
+					Err = ErrWrongLeader
+				} else {
+					Err = OK
+				}
+				break
+			}
+		}
+		kv.mu.Lock()
+		delete(kv.channel, idx)
+		kv.mu.Unlock()
+	}
+	return
+}
+
+func (kv *ShardKV) apply() {
+	for !kv.killed() {
+		applyMsg := <-kv.applyCh
+		if applyMsg.CommandValid {
+			command := (applyMsg.Command).(Op)
+			kv.mu.Lock()
+			lastSequence, ok := kv.lastSequence[command.ClientId]
+			notify := Notify{command.SequenceNum, applyMsg.CommandTerm}
+			if !ok || lastSequence < command.SequenceNum {
+				switch command.Operator {
+				case "Put":
+					{
+						kv.database[command.Key] = command.Value
+					}
+				case "Append":
+					{
+						if value, ok := kv.database[command.Key]; ok {
+							kv.database[command.Key] = value + command.Value
+						} else {
+							kv.database[command.Key] = command.Value
+						}
+					}
+				}
+				ch, ok := kv.channel[applyMsg.CommandIndex]
+				if ok {
+					ch <- notify
+				}
+
+			}
+		}
+	}
 }
 
 //
@@ -43,10 +155,15 @@ func (kv *ShardKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 // turn off debug output from this instance.
 //
 func (kv *ShardKV) Kill() {
+	atomic.StoreInt32(&kv.dead, 1)
 	kv.rf.Kill()
 	// Your code here, if desired.
 }
 
+func (kv *ShardKV) killed() bool {
+	z := atomic.LoadInt32(&kv.dead)
+	return z == 1
+}
 
 //
 // servers[] contains the ports of the servers in this group.
@@ -95,7 +212,6 @@ func StartServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persister,
 
 	kv.applyCh = make(chan raft.ApplyMsg)
 	kv.rf = raft.Make(servers, me, persister, kv.applyCh)
-
 
 	return kv
 }

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const Debug = true
+const Debug = false
 
 func DPrintf(format string, a ...interface{}) (n int, err error) {
 	if Debug {
@@ -62,12 +62,11 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		reply.Err = ErrWrongLeader
 		return
 	}
-	kv.mu.Lock()
 	if _, isLeader := kv.rf.GetState(); !isLeader {
 		reply.Err = ErrWrongLeader
-		kv.mu.Unlock()
 		return
 	} else {
+		kv.mu.Lock()
 		lastSequence, ok := kv.lastSequence[args.ClientId]
 		if ok && args.SequenceNum <= lastSequence {
 			reply.Err, reply.Value = OK, kv.database[args.Key]
@@ -92,6 +91,21 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		kv.mu.Unlock()
 		DPrintf("%d wait on channel %d\n", kv.me, idx)
 		select {
+		case <-time.After(500 * time.Millisecond):
+			{
+				kv.mu.Lock()
+				_, isLeader = kv.rf.GetState()
+				lastSequence, ok := kv.lastSequence[args.ClientId]
+				if isLeader && ok && args.SequenceNum <= lastSequence {
+					reply.Err, reply.Value = OK, kv.database[args.Key]
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				DPrintf("%d delete channel %d\n", kv.me, idx)
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
+				break
+			}
 		case notify := <-ch:
 			{
 				DPrintf("%d wake on channel %d\n", kv.me, idx)
@@ -113,24 +127,10 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 				kv.mu.Unlock()
 				break
 			}
-		case <-time.After(500 * time.Millisecond):
-			{
-				kv.mu.Lock()
-				_, isLeader = kv.rf.GetState()
-				lastSequence, ok := kv.lastSequence[args.ClientId]
-				if isLeader && ok && args.SequenceNum <= lastSequence {
-					reply.Err, reply.Value = OK, kv.database[args.Key]
-				} else {
-					reply.Err = ErrWrongLeader
-				}
-				DPrintf("%d delete channel %d\n", kv.me, idx)
-				delete(kv.channel, idx)
-				kv.mu.Unlock()
-				break
-			}
 		}
 	}
-	DPrintf("Get end: Err: %v, Value: %v\n", reply.Err, reply.Value)
+	DPrintf("Get from %d end, seq[%d] : Err: %v, Value: %v\n",
+		args.ClientId, args.SequenceNum, reply.Err, reply.Value)
 }
 
 func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
