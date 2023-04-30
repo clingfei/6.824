@@ -41,8 +41,8 @@ func (ck *Clerk) Query(num int) Config {
 		for _, srv := range ck.servers {
 			var reply QueryReply
 			ok := srv.Call("ShardCtrler.Query", args, &reply)
-			Debug("c[%d] receive reply from s[%d]:%v %v %s %v, seq[%d]\n",
-				ck.me, srv, ok, reply.WrongLeader, reply.Err, reply.Config, ck.sequenceId)
+			//Debug("c[%d] receive reply from s[%d]:%v %v %s %v, seq[%d]\n",
+			//	ck.me, srv, ok, reply.WrongLeader, reply.Err, reply.Config, ck.sequenceId)
 			if ok && reply.WrongLeader == false {
 				return reply.Config
 			}

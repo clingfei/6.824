@@ -34,6 +34,8 @@ func TestStaticShards(t *testing.T) {
 	cfg.join(0)
 	cfg.join(1)
 
+	fmt.Println("add two groups")
+
 	n := 10
 	ka := make([]string, n)
 	va := make([]string, n)

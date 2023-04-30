@@ -82,9 +82,11 @@ func (ck *Clerk) Get(key string) string {
 				var reply GetReply
 				ok := srv.Call("ShardKV.Get", &args, &reply)
 				if ok && (reply.Err == OK || reply.Err == ErrNoKey) {
+					DPrintf("C[%d]'s Get seq[%d] receive [%s]", ck.me, args.SequenceId, reply.Err)
 					return reply.Value
 				}
 				if ok && (reply.Err == ErrWrongGroup) {
+					DPrintf("C[%d]'s Get seq[%d] receive [%s]", ck.me, args.SequenceId, reply.Err)
 					break
 				}
 				// ... not ok, or ErrWrongLeader
@@ -112,10 +114,13 @@ func (ck *Clerk) PutAppend(key string, value string, op string) {
 				var reply PutAppendReply
 				ok := srv.Call("ShardKV.PutAppend", &args, &reply)
 				if ok && reply.Err == OK {
+					DPrintf("C[%d]'s PutAppend seq[%d] receive OK\n", ck.me, args.SequenceId)
 					return
-				}
-				if ok && reply.Err == ErrWrongGroup {
+				} else if ok && reply.Err == ErrWrongGroup {
+					DPrintf("C[%d]'s PutAppend seq[%d] receive ErrWrongGroup\n", ck.me, args.SequenceId)
 					break
+				} else {
+					DPrintf("%v, %v", ok, reply.Err)
 				}
 				// ... not ok, or ErrWrongLeader
 			}

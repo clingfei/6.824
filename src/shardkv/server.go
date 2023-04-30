@@ -1,13 +1,16 @@
 package shardkv
 
 import (
+	"6.824/labgob"
 	"6.824/labrpc"
+	"6.824/raft"
+	"6.824/shardctrler"
+	"bytes"
+	"log"
+	"sync"
 	"sync/atomic"
 	"time"
 )
-import "6.824/raft"
-import "sync"
-import "6.824/labgob"
 
 type Op struct {
 	// Your definitions here.
@@ -36,115 +39,279 @@ type ShardKV struct {
 	maxraftstate int // snapshot if log grows this big
 
 	// Your definitions here.
-	lastSequence map[int64]int64
-	database     map[string]string
-	channel      map[int]chan Notify
-	indexMap     map[int64]int
-	dead         int32
+	mck    *shardctrler.Clerk
+	config shardctrler.Config
+
+	lastSequence      map[int64]int64
+	database          map[string]string
+	channel           map[int]chan Notify
+	indexMap          map[int64]int
+	dead              int32
+	snapshotLastIndex int
 }
 
+const Debug = true
+
+func DPrintf(format string, a ...interface{}) (n int, err error) {
+	if Debug {
+		log.Printf(format, a...)
+	}
+	return
+}
+
+// 检查是否是Leader
+// 检查对应的key是否应该由自己处理，
 func (kv *ShardKV) Get(args *GetArgs, reply *GetReply) {
 	// Your code here.
-	command := Op{"Get", args.Key, "", args.ClientId, args.SequenceId}
-	reply.Err = kv.ApplyCommand(args.ClientId, args.SequenceId, command)
-	kv.mu.Lock()
-	if reply.Err == OK {
-		if value, ok := kv.database[args.Key]; ok {
-			reply.Value = value
-		} else {
-			reply.Err = ErrNoKey
-		}
+	DPrintf("S[%d] receive Get RPC from C[%d], seq[%d], key: %v\n",
+		kv.me, args.ClientId, args.SequenceId, args.Key)
+	if kv.killed() {
+		reply.Err = ErrWrongLeader
+		return
 	}
-	kv.mu.Unlock()
-}
-
-func (kv *ShardKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
-	// Your code here.
-}
-
-func (kv *ShardKV) ApplyCommand(clientId, sequence int64, command Op) (Err Err) {
-	kv.mu.Lock()
 	if _, isLeader := kv.rf.GetState(); !isLeader {
-		kv.mu.Unlock()
-		Err = ErrWrongLeader
+		reply.Err = ErrWrongLeader
+		return
 	} else {
-		lastSequence, ok := kv.lastSequence[clientId]
-		if ok && lastSequence >= sequence {
-			Err = OK
+		// 要不要加锁
+		shard := key2shard(args.Key)
+		kv.mu.Lock()
+		if kv.config.Shards[shard] != kv.gid {
+			reply.Err = ErrWrongGroup
 			kv.mu.Unlock()
 			return
+		}
+		lastSequence, ok := kv.lastSequence[args.ClientId]
+		if ok && args.SequenceId <= lastSequence {
+			reply.Err, reply.Value = OK, kv.database[args.Key]
+			kv.mu.Unlock()
+			return
+		}
+		command := Op{
+			"Get", args.Key, "", args.ClientId, args.SequenceId,
 		}
 		kv.mu.Unlock()
 		idx, term, isLeader := kv.rf.Start(command)
 		if !isLeader {
-			Err = ErrWrongLeader
+			reply.Err = ErrWrongLeader
 			return
 		}
 		kv.mu.Lock()
 		ch, ok := kv.channel[idx]
 		if !ok {
-			ch = make(chan Notify, 1)
-			kv.channel[idx] = ch
+			kv.channel[idx] = make(chan Notify, 1)
+			ch = kv.channel[idx]
+		}
+		kv.mu.Unlock()
+
+		select {
+		case <-time.After(500 * time.Millisecond):
+			{
+				kv.mu.Lock()
+				_, isLeader = kv.rf.GetState()
+				lastSequence, ok := kv.lastSequence[args.ClientId]
+				if isLeader && ok && args.SequenceId <= lastSequence {
+					// 在等待apply的过程中，可能有相同序列号的请求被处理了
+					reply.Err, reply.Value = OK, kv.database[args.Key]
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
+				break
+			}
+		case notify := <-ch:
+			{
+				kv.mu.Lock()
+				if notify.sequenceNum == args.SequenceId && term == notify.term {
+					if value, ok := kv.database[args.Key]; !ok {
+						reply.Err = ErrNoKey
+						kv.lastSequence[args.ClientId] = args.SequenceId
+					} else {
+						kv.lastSequence[args.ClientId] = args.SequenceId
+						reply.Value, reply.Err = value, OK
+					}
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
+				break
+			}
+		}
+	}
+}
+
+func (kv *ShardKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
+	// Your code here.
+	DPrintf("S[%d] receive PutAppend RPC from C[%d], seq[%d], key: %v\n",
+		kv.me, args.ClientId, args.SequenceId, args.Key)
+	if kv.killed() {
+		reply.Err = ErrWrongLeader
+		DPrintf("Seq[%d] ErrWrongLeader\n", args.SequenceId)
+		return
+	}
+	if _, isLeader := kv.rf.GetState(); !isLeader {
+		reply.Err = ErrWrongLeader
+		DPrintf("Seq[%d] ErrWrongLeader\n", args.SequenceId)
+		return
+	} else {
+		shard := key2shard(args.Key)
+		kv.mu.Lock()
+		if kv.config.Shards[shard] != kv.gid {
+			reply.Err = ErrWrongGroup
+			kv.mu.Unlock()
+			DPrintf("Seq[%d] ErrWrongGroup\n", args.SequenceId)
+			return
+		}
+		if lastSequence, ok := kv.lastSequence[args.ClientId]; ok && args.SequenceId <= lastSequence {
+			reply.Err = OK
+			DPrintf("Seq[%d] Duplicate request\n", args.SequenceId)
+			kv.mu.Unlock()
+			return
+		}
+		command := Op{
+			args.Op, args.Key, args.Value, args.ClientId, args.SequenceId,
+		}
+		kv.mu.Unlock()
+		DPrintf("seq[%d] start\n", args.SequenceId)
+		idx, term, isLeader := kv.rf.Start(command)
+		if !isLeader {
+			reply.Err = ErrWrongLeader
+			return
+		}
+		kv.mu.Lock()
+		ch, ok := kv.channel[idx]
+		if !ok {
+			kv.channel[idx] = make(chan Notify, 1)
+			ch = kv.channel[idx]
 		}
 		kv.mu.Unlock()
 		select {
-		case notify := <-ch:
-			{
-				if notify.sequenceNum != sequence || term != notify.term {
-					Err = ErrWrongLeader
-				} else {
-					Err = OK
-				}
-				break
-			}
 		case <-time.After(500 * time.Millisecond):
 			{
+				kv.mu.Lock()
 				_, isLeader := kv.rf.GetState()
-				if !isLeader {
-					Err = ErrWrongLeader
+				lastSequence, ok := kv.lastSequence[args.ClientId]
+				if isLeader && ok && args.SequenceId <= lastSequence {
+					reply.Err = OK
 				} else {
-					Err = OK
+					reply.Err = ErrWrongLeader
 				}
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
+				break
+			}
+		case notify := <-ch:
+			{
+				DPrintf("S[%d] wake on channel %d\n", kv.me, idx)
+				kv.mu.Lock()
+				if notify.sequenceNum == args.SequenceId && term == notify.term {
+					reply.Err = OK
+				} else {
+					reply.Err = ErrWrongLeader
+				}
+				delete(kv.channel, idx)
+				kv.mu.Unlock()
 				break
 			}
 		}
-		kv.mu.Lock()
-		delete(kv.channel, idx)
-		kv.mu.Unlock()
 	}
-	return
+	DPrintf("Response for PutAppend from C[%d] seq[%d]: %v", args.ClientId, args.SequenceId, reply.Err)
 }
 
 func (kv *ShardKV) apply() {
 	for !kv.killed() {
 		applyMsg := <-kv.applyCh
 		if applyMsg.CommandValid {
+			DPrintf("S[%d] applyMsg: Snapshot: %v, %d, Command: %v, %d\n",
+				kv.me, applyMsg.SnapshotValid, applyMsg.SnapshotIndex, applyMsg.CommandValid, applyMsg.CommandIndex)
 			command := (applyMsg.Command).(Op)
 			kv.mu.Lock()
+			DPrintf("S[%d] applyMsg: isValid: %v, CommandIndex: %d, SequenceNum: %d, Value: %v, Operator: %v\n",
+				kv.me, applyMsg.CommandValid, applyMsg.CommandIndex, command.SequenceNum, command.Value, command.Operator)
 			lastSequence, ok := kv.lastSequence[command.ClientId]
-			notify := Notify{command.SequenceNum, applyMsg.CommandTerm}
-			if !ok || lastSequence < command.SequenceNum {
-				switch command.Operator {
-				case "Put":
-					{
+			//			notify := Notify{command.SequenceNum, applyMsg.CommandTerm}
+			if command.Operator == "Put" {
+				if !ok || lastSequence < command.SequenceNum {
+					kv.database[command.Key] = command.Value
+					kv.lastSequence[command.ClientId] = command.SequenceNum
+				}
+			} else if command.Operator == "Append" {
+				if !ok || lastSequence < command.SequenceNum {
+					value, ok := kv.database[command.Key]
+					if !ok {
 						kv.database[command.Key] = command.Value
+					} else {
+						kv.database[command.Key] = value + command.Value
 					}
-				case "Append":
-					{
-						if value, ok := kv.database[command.Key]; ok {
-							kv.database[command.Key] = value + command.Value
-						} else {
-							kv.database[command.Key] = command.Value
-						}
-					}
+					kv.lastSequence[command.ClientId] = command.SequenceNum
 				}
-				ch, ok := kv.channel[applyMsg.CommandIndex]
-				if ok {
-					ch <- notify
-				}
-
 			}
+			ch, ok := kv.channel[applyMsg.CommandIndex]
+			notify := Notify{command.SequenceNum, applyMsg.CommandTerm}
+			kv.mu.Unlock()
+			if ok {
+				DPrintf("S[%d] wake on channel %d\n", kv.me, applyMsg.CommandIndex)
+				ch <- notify
+			} else {
+				DPrintf("S[%d] channel %d not found\n", kv.me, applyMsg.CommandIndex)
+			}
+			if kv.maxraftstate != -1 {
+				kv.mu.Lock()
+				if kv.rf.Persister.RaftStateSize() >= kv.maxraftstate {
+					kv.snapshotLastIndex = applyMsg.CommandIndex
+					kv.StartSnapshot()
+				}
+				kv.mu.Unlock()
+			}
+		} else {
+			snapshot := applyMsg.Snapshot
+			kv.mu.Lock()
+			kv.RestoreFromSnapshot(snapshot)
+			kv.snapshotLastIndex = applyMsg.SnapshotIndex
+			kv.CleanChannel()
+			kv.mu.Unlock()
 		}
+	}
+}
+
+func (kv *ShardKV) CleanChannel() {
+	for idx := range kv.channel {
+		// 说明之前的idx的操作已经在leader上完成了，这些channel都可以删除
+		if idx <= kv.snapshotLastIndex {
+			delete(kv.channel, idx)
+		}
+	}
+}
+
+// TO FIX
+func (kv *ShardKV) StartSnapshot() {
+	DPrintf("S[%d] start Snapshot\n", kv.me)
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(kv.database)
+	e.Encode(kv.lastSequence)
+	e.Encode(kv.snapshotLastIndex)
+	data := w.Bytes()
+	kv.rf.Snapshot(kv.snapshotLastIndex, data)
+}
+
+func (kv *ShardKV) RestoreFromSnapshot(snapshot []byte) {
+	if snapshot == nil || len(snapshot) < 1 {
+		return
+	}
+	r := bytes.NewBuffer(snapshot)
+	d := labgob.NewDecoder(r)
+	var database map[string]string
+	var lastSequence map[int64]int64
+	var snapshotLastIndex int
+	if d.Decode(&database) != nil || d.Decode(&lastSequence) != nil || d.Decode(&snapshotLastIndex) != nil {
+		DPrintf("ReadSnapshot failed\n")
+	} else {
+		kv.database = database
+		kv.lastSequence = lastSequence
+		kv.snapshotLastIndex = snapshotLastIndex
 	}
 }
 
@@ -163,6 +330,17 @@ func (kv *ShardKV) Kill() {
 func (kv *ShardKV) killed() bool {
 	z := atomic.LoadInt32(&kv.dead)
 	return z == 1
+}
+
+func (kv *ShardKV) GetConfig() {
+	for {
+		newConfig := kv.mck.Query(-1)
+		kv.mu.Lock()
+		kv.config = newConfig
+		kv.mu.Unlock()
+		// DPrintf("current config: %v\n", kv.config)
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 //
@@ -210,8 +388,30 @@ func StartServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persister,
 	// Use something like this to talk to the shardctrler:
 	// kv.mck = shardctrler.MakeClerk(kv.ctrlers)
 
+	kv.mck = shardctrler.MakeClerk(kv.ctrlers)
+
 	kv.applyCh = make(chan raft.ApplyMsg)
 	kv.rf = raft.Make(servers, me, persister, kv.applyCh)
 
+	kv.database = make(map[string]string)
+	kv.lastSequence = make(map[int64]int64)
+	kv.channel = make(map[int]chan Notify)
+	kv.indexMap = make(map[int64]int)
+	kv.snapshotLastIndex = 0
+
+	snapshot := persister.ReadSnapshot()
+	if len(snapshot) >= 0 {
+		kv.mu.Lock()
+		kv.RestoreFromSnapshot(snapshot)
+		kv.mu.Unlock()
+	}
+	go kv.GetConfig()
+	go kv.apply()
+
 	return kv
 }
+
+// 对于server来说，如何获知自己应该处理哪个shard？
+// 通过Query(-1)获得当前最新的
+
+// 从Config中可以得到每个shard对应的gid，通过key2Shard将key转换成对应的shard，然后判断是否应该由自己处理

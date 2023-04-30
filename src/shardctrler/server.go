@@ -165,14 +165,14 @@ func (sc *ShardCtrler) executeMove(GID, shard int) Err {
 }
 
 func (sc *ShardCtrler) Query(args *QueryArgs, reply *QueryReply) {
-	Debug("S[%d] receive Query from %d, Sequence: %d, Num: %d\n", sc.me, args.ClientId, args.Sequence, args.Num)
+	//Debug("S[%d] receive Query from %d, Sequence: %d, Num: %d\n", sc.me, args.ClientId, args.Sequence, args.Num)
 	// Your code here.
 	Command := Op{
 		"Query", args.ClientId, args.Sequence, nil, nil, args.Num, -1, -1,
 	}
 	reply.WrongLeader, reply.Err = sc.ApplyCommand(args.ClientId, args.Sequence, Command)
-	Debug("com[Query] seq[%d] from c[%d] Reply: %v %s\n",
-		args.Sequence, args.ClientId, reply.WrongLeader, reply.Err)
+	//Debug("com[Query] seq[%d] from c[%d] Reply: %v %s\n",
+	//	args.Sequence, args.ClientId, reply.WrongLeader, reply.Err)
 	if reply.WrongLeader {
 		return
 	}
@@ -186,7 +186,7 @@ func (sc *ShardCtrler) Query(args *QueryArgs, reply *QueryReply) {
 	}
 	sc.lastSequence[args.ClientId] = args.Sequence
 	sc.mu.Unlock()
-	Debug("S[%d] reply Query to %d, config: %v\n", sc.me, args.ClientId, reply.Config)
+	//Debug("S[%d] reply Query to %d, config: %v\n", sc.me, args.ClientId, reply.Config)
 	return
 }
 

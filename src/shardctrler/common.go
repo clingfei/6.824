@@ -32,7 +32,7 @@ type Config struct {
 
 const (
 	OK    = "OK"
-	DEBUG = true
+	DEBUG = false
 )
 
 type Err string
