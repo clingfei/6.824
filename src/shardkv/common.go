@@ -18,6 +18,19 @@ const (
 
 type Err string
 
+type MigrateArgs struct {
+	Database     map[string]string
+	LaseSequence map[int64]int64
+	ClientId     int64
+	SequenceId   int64
+	Gid          int
+	Num          int
+}
+
+type MigrateReply struct {
+	Err Err
+}
+
 // Put or Append
 type PutAppendArgs struct {
 	// You'll have to add definitions here.

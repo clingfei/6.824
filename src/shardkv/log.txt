@@ -1,0 +1,1381 @@
+Test: static shards ...
+add two groups
+G[100] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017873], key: 0, value: vQ9GxYRBBjRQ1qbV0iuY
+Seq[1979160641976017873] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017873], key: 0, value: vQ9GxYRBBjRQ1qbV0iuY
+seq[1979160641976017873] start
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017873, Value: vQ9GxYRBBjRQ1qbV0iuY, Operator: Put
+G[100] S[1] wake on channel 1
+S[1] wake on channel 1
+G[100] S[1] Response for PutAppend from C[3105487256500976839] seq[1979160641976017873]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017873] receive OK
+G[100] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017874], key: 1, value: QJNKcaA_gBs8YxsZ8nB_
+Seq[1979160641976017874] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017874], key: 1, value: QJNKcaA_gBs8YxsZ8nB_
+seq[1979160641976017874] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017873, Value: vQ9GxYRBBjRQ1qbV0iuY, Operator: Put
+G[100] S[2] channel 1 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017873, Value: vQ9GxYRBBjRQ1qbV0iuY, Operator: Put
+G[100] S[0] channel 1 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017874, Value: QJNKcaA_gBs8YxsZ8nB_, Operator: Put
+G[100] S[1] wake on channel 2
+S[1] wake on channel 2
+G[100] S[1] Response for PutAppend from C[3105487256500976839] seq[1979160641976017874]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017874] receive OK
+G[101] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017875], key: 2, value: TEOWp-3EAlMTBmQ_gIOI
+seq[1979160641976017875] start
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[0] wake on channel 1
+S[0] wake on channel 1
+G[101] S[0] Response for PutAppend from C[3105487256500976839] seq[1979160641976017875]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017875] receive OK
+G[101] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017876], key: 3, value: BbkHFj6wwL5KUSquhB1v
+seq[1979160641976017876] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[1] channel 1 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[2] channel 1 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[0] wake on channel 2
+S[0] wake on channel 2
+G[101] S[0] Response for PutAppend from C[3105487256500976839] seq[1979160641976017876]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017876] receive OK
+G[101] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017877], key: 4, value: smLJVRo_F0xeLUMWrO9U
+seq[1979160641976017877] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[2] channel 2 not found
+G[101] S[1] channel 2 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[0] wake on channel 3
+S[0] wake on channel 3
+G[101] S[0] Response for PutAppend from C[3105487256500976839] seq[1979160641976017877]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017877] receive OK
+G[101] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017878], key: 5, value: hsca53LqwXUTM2i-4_j8
+seq[1979160641976017878] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[2] channel 3 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[1] channel 3 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[0] wake on channel 4
+S[0] wake on channel 4
+G[101] S[0] Response for PutAppend from C[3105487256500976839] seq[1979160641976017878]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017878] receive OK
+G[101] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017879], key: 6, value: gZCtif6PcomJR1CgIu7Y
+seq[1979160641976017879] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[2] channel 4 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[1] channel 4 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[0] wake on channel 5
+S[0] wake on channel 5
+G[101] S[0] Response for PutAppend from C[3105487256500976839] seq[1979160641976017879]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017879] receive OK
+G[100] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017880], key: 7, value: ols32P9X-uEijpBio3Rl
+Seq[1979160641976017880] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017880], key: 7, value: ols32P9X-uEijpBio3Rl
+seq[1979160641976017880] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017874, Value: QJNKcaA_gBs8YxsZ8nB_, Operator: Put
+G[100] S[0] channel 2 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017874, Value: QJNKcaA_gBs8YxsZ8nB_, Operator: Put
+G[100] S[2] channel 2 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017880, Value: ols32P9X-uEijpBio3Rl, Operator: Put
+G[100] S[1] wake on channel 3
+S[1] wake on channel 3
+G[100] S[1] Response for PutAppend from C[3105487256500976839] seq[1979160641976017880]: OK
+C[3105487256500976839]'s PutAppend seq[1979160641976017880] receive OK
+G[100] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017881], key: 8, value: 3f6ecKirRpam5deSQXrj
+Seq[1979160641976017881] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017881], key: 8, value: 3f6ecKirRpam5deSQXrj
+seq[1979160641976017881] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017880, Value: ols32P9X-uEijpBio3Rl, Operator: Put
+G[100] S[2] channel 3 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017881, Value: 3f6ecKirRpam5deSQXrj, Operator: Put
+G[100] S[1] wake on channel 4
+S[1] wake on channel 4
+G[100] S[1] Response for PutAppend from C[3105487256500976839] seq[1979160641976017881]: OK
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017880, Value: ols32P9X-uEijpBio3Rl, Operator: Put
+G[100] S[0] channel 3 not found
+C[3105487256500976839]'s PutAppend seq[1979160641976017881] receive OK
+G[100] S[0] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017882], key: 9, value: OyqPgycjo8jfDtSfhCk3
+Seq[1979160641976017882] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[3105487256500976839], seq[1979160641976017882], key: 9, value: OyqPgycjo8jfDtSfhCk3
+seq[1979160641976017882] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017881, Value: 3f6ecKirRpam5deSQXrj, Operator: Put
+G[100] S[2] channel 4 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017882, Value: OyqPgycjo8jfDtSfhCk3, Operator: Put
+G[100] S[1] wake on channel 5
+S[1] wake on channel 5
+G[100] S[1] Response for PutAppend from C[3105487256500976839] seq[1979160641976017882]: OK
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017881, Value: 3f6ecKirRpam5deSQXrj, Operator: Put
+G[100] S[0] channel 4 not found
+C[3105487256500976839]'s PutAppend seq[1979160641976017882] receive OK
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017883], key: 0
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017883], key: 0
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017882, Value: OyqPgycjo8jfDtSfhCk3, Operator: Put
+G[100] S[0] channel 5 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017882, Value: OyqPgycjo8jfDtSfhCk3, Operator: Put
+G[100] S[2] channel 5 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017883, Value: , Operator: Get
+G[100] S[1] wake on channel 6
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017883]: Err: OK, Value: vQ9GxYRBBjRQ1qbV0iuY
+C[3105487256500976839]'s Get seq[1979160641976017883] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017884], key: 1
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017884], key: 1
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017883, Value: , Operator: Get
+G[100] S[0] channel 6 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017884, Value: , Operator: Get
+G[100] S[1] wake on channel 7
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017884]: Err: OK, Value: QJNKcaA_gBs8YxsZ8nB_
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017883, Value: , Operator: Get
+G[100] S[2] channel 6 not found
+C[3105487256500976839]'s Get seq[1979160641976017884] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017885], key: 2
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[1] channel 5 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[0] wake on channel 6
+G[101] S[0] Response for Get from C[3105487256500976839] seq[1979160641976017885]: Err: OK, Value: TEOWp-3EAlMTBmQ_gIOI
+C[3105487256500976839]'s Get seq[1979160641976017885] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[2] channel 5 not found
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017886], key: 3
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[2] channel 6 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[1] channel 6 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[0] wake on channel 7
+G[101] S[0] Response for Get from C[3105487256500976839] seq[1979160641976017886]: Err: OK, Value: BbkHFj6wwL5KUSquhB1v
+C[3105487256500976839]'s Get seq[1979160641976017886] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017887], key: 4
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[1] channel 7 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[2] channel 7 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[0] wake on channel 8
+G[101] S[0] Response for Get from C[3105487256500976839] seq[1979160641976017887]: Err: OK, Value: smLJVRo_F0xeLUMWrO9U
+C[3105487256500976839]'s Get seq[1979160641976017887] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[2] channel 8 not found
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017888], key: 5
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[1] channel 8 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[0] wake on channel 9
+G[101] S[0] Response for Get from C[3105487256500976839] seq[1979160641976017888]: Err: OK, Value: hsca53LqwXUTM2i-4_j8
+C[3105487256500976839]'s Get seq[1979160641976017888] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017889], key: 6
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[2] channel 9 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017889, Value: , Operator: Get
+G[101] S[0] wake on channel 10
+G[101] S[0] Response for Get from C[3105487256500976839] seq[1979160641976017889]: Err: OK, Value: gZCtif6PcomJR1CgIu7Y
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[1] channel 9 not found
+C[3105487256500976839]'s Get seq[1979160641976017889] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017890], key: 7
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017890], key: 7
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017884, Value: , Operator: Get
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017884, Value: , Operator: Get
+G[100] S[2] channel 7 not found
+G[100] S[0] channel 7 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017890, Value: , Operator: Get
+G[100] S[1] wake on channel 8
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017890]: Err: OK, Value: ols32P9X-uEijpBio3Rl
+C[3105487256500976839]'s Get seq[1979160641976017890] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017891], key: 8
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017891], key: 8
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017890, Value: , Operator: Get
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017890, Value: , Operator: Get
+G[100] S[0] channel 8 not found
+G[100] S[2] channel 8 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017891, Value: , Operator: Get
+G[100] S[1] wake on channel 9
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017891]: Err: OK, Value: 3f6ecKirRpam5deSQXrj
+C[3105487256500976839]'s Get seq[1979160641976017891] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017892], key: 9
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017891, Value: , Operator: Get
+G[100] S[2] channel 9 not found
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017892], key: 9
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017891, Value: , Operator: Get
+G[100] S[0] channel 9 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017892, Value: , Operator: Get
+G[100] S[1] wake on channel 10
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017892]: Err: OK, Value: OyqPgycjo8jfDtSfhCk3
+C[3105487256500976839]'s Get seq[1979160641976017892] receive [OK]
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017892, Value: , Operator: Get
+G[100] S[0] channel 10 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017892, Value: , Operator: Get
+G[100] S[2] channel 10 not found
+G[100] S[0] receive Get RPC from C[1897414956138850077], seq[1989694529007170740], key: 0
+G[100] S[1] receive Get RPC from C[1897414956138850077], seq[1989694529007170740], key: 0
+G[100] S[0] receive Get RPC from C[2523713084484039872], seq[122156739466175115], key: 8
+G[100] S[0] receive Get RPC from C[4039672416660322994], seq[2475116970818198941], key: 7
+G[100] S[0] receive Get RPC from C[3853192862419402891], seq[1830960814064031255], key: 1
+G[100] S[0] receive Get RPC from C[1087034422689160178], seq[3898171490495400277], key: 9
+G[100] S[1] receive Get RPC from C[4039672416660322994], seq[2475116970818198941], key: 7
+G[100] S[1] receive Get RPC from C[3853192862419402891], seq[1830960814064031255], key: 1
+G[100] S[1] receive Get RPC from C[2523713084484039872], seq[122156739466175115], key: 8
+G[100] S[1] receive Get RPC from C[1087034422689160178], seq[3898171490495400277], key: 9
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 1989694529007170740, Value: , Operator: Get
+G[100] S[1] wake on channel 11
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2475116970818198941, Value: , Operator: Get
+G[100] S[1] wake on channel 12
+G[100] S[1] Response for Get from C[4039672416660322994] seq[2475116970818198941]: Err: OK, Value: ols32P9X-uEijpBio3Rl
+G[100] S[1] Response for Get from C[1897414956138850077] seq[1989694529007170740]: Err: OK, Value: vQ9GxYRBBjRQ1qbV0iuY
+C[4039672416660322994]'s Get seq[2475116970818198941] receive [OK]
+C[1897414956138850077]'s Get seq[1989694529007170740] receive [OK]
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 122156739466175115, Value: , Operator: Get
+G[100] S[1] wake on channel 13
+G[100] S[1] Response for Get from C[2523713084484039872] seq[122156739466175115]: Err: OK, Value: 3f6ecKirRpam5deSQXrj
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1830960814064031255, Value: , Operator: Get
+G[100] S[1] wake on channel 14
+G[100] S[1] Response for Get from C[3853192862419402891] seq[1830960814064031255]: Err: OK, Value: QJNKcaA_gBs8YxsZ8nB_
+C[2523713084484039872]'s Get seq[122156739466175115] receive [OK]
+C[3853192862419402891]'s Get seq[1830960814064031255] receive [OK]
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 1989694529007170740, Value: , Operator: Get
+G[100] S[2] channel 11 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2475116970818198941, Value: , Operator: Get
+G[100] S[2] channel 12 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 3898171490495400277, Value: , Operator: Get
+G[100] S[1] wake on channel 15
+G[100] S[1] Response for Get from C[1087034422689160178] seq[3898171490495400277]: Err: OK, Value: OyqPgycjo8jfDtSfhCk3
+C[1087034422689160178]'s Get seq[3898171490495400277] receive [OK]
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 1989694529007170740, Value: , Operator: Get
+G[100] S[0] channel 11 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2475116970818198941, Value: , Operator: Get
+G[100] S[0] channel 12 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 122156739466175115, Value: , Operator: Get
+G[100] S[2] channel 13 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 122156739466175115, Value: , Operator: Get
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1830960814064031255, Value: , Operator: Get
+G[100] S[2] channel 14 not found
+G[100] S[0] channel 13 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1830960814064031255, Value: , Operator: Get
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 3898171490495400277, Value: , Operator: Get
+G[100] S[2] channel 15 not found
+G[100] S[0] channel 14 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 3898171490495400277, Value: , Operator: Get
+G[100] S[0] channel 15 not found
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017893], key: 0
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017893], key: 0
+G[101] S[2] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017893, Value: , Operator: Get
+G[100] S[1] wake on channel 16
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017893]: Err: OK, Value: vQ9GxYRBBjRQ1qbV0iuY
+C[3105487256500976839]'s Get seq[1979160641976017893] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017894], key: 1
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017894], key: 1
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017893, Value: , Operator: Get
+G[100] S[0] channel 16 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017893, Value: , Operator: Get
+G[100] S[2] channel 16 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017894, Value: , Operator: Get
+G[100] S[1] wake on channel 17
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017894]: Err: OK, Value: QJNKcaA_gBs8YxsZ8nB_
+C[3105487256500976839]'s Get seq[1979160641976017894] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[0] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[101] S[1] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[101] S[2] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017894, Value: , Operator: Get
+G[100] S[0] channel 17 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017894, Value: , Operator: Get
+G[100] S[2] channel 17 not found
+G[101] S[0] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[0] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[1] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[1] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[2] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[2] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[0] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[1] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[2] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[0] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[101] S[1] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[101] S[2] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[101] S[0] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[101] S[1] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[101] S[2] receive Get RPC from C[1708090421256961467], seq[708283475294333469], key: 4
+G[101] S[0] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[0] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[1] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[1] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[2] receive Get RPC from C[4537253575342452549], seq[4452724392049649705], key: 5
+G[101] S[2] receive Get RPC from C[2115538730978071977], seq[2692663348445256897], key: 2
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[2] channel 1 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[2] channel 2 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[2] channel 3 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[2] channel 4 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[2] channel 5 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[2] channel 6 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[2] channel 7 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[2] channel 8 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[2] channel 9 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017889, Value: , Operator: Get
+G[101] S[2] channel 10 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 4452724392049649705, Value: , Operator: Get
+G[101] S[2] wake on channel 11
+G[101] S[2] Response for Get from C[4537253575342452549] seq[4452724392049649705]: Err: OK, Value: hsca53LqwXUTM2i-4_j8
+C[4537253575342452549]'s Get seq[4452724392049649705] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2692663348445256897, Value: , Operator: Get
+G[101] S[2] wake on channel 12
+G[101] S[2] Response for Get from C[2115538730978071977] seq[2692663348445256897]: Err: OK, Value: TEOWp-3EAlMTBmQ_gIOI
+C[2115538730978071977]'s Get seq[2692663348445256897] receive [OK]
+G[101] S[0] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[1] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[2] receive Get RPC from C[3689558003981046669], seq[2976389657623161418], key: 6
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[1] channel 1 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[1] channel 2 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[1] channel 3 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[1] channel 4 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[1] channel 5 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[1] channel 6 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[1] channel 7 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[1] channel 8 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[1] channel 9 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017889, Value: , Operator: Get
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 1979160641976017875, Value: TEOWp-3EAlMTBmQ_gIOI, Operator: Put
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2976389657623161418, Value: , Operator: Get
+G[101] S[2] wake on channel 13
+G[101] S[0] channel 1 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 1979160641976017876, Value: BbkHFj6wwL5KUSquhB1v, Operator: Put
+G[101] S[0] channel 2 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 1979160641976017877, Value: smLJVRo_F0xeLUMWrO9U, Operator: Put
+G[101] S[0] channel 3 not found
+G[101] S[2] Response for Get from C[3689558003981046669] seq[2976389657623161418]: Err: OK, Value: gZCtif6PcomJR1CgIu7Y
+G[101] S[1] channel 10 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 1979160641976017878, Value: hsca53LqwXUTM2i-4_j8, Operator: Put
+G[101] S[0] channel 4 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 1979160641976017879, Value: gZCtif6PcomJR1CgIu7Y, Operator: Put
+G[101] S[0] channel 5 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 1979160641976017885, Value: , Operator: Get
+G[101] S[0] channel 6 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 1979160641976017886, Value: , Operator: Get
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017895], key: 2
+C[3689558003981046669]'s Get seq[2976389657623161418] receive [OK]
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 4452724392049649705, Value: , Operator: Get
+G[101] S[1] channel 11 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2692663348445256897, Value: , Operator: Get
+G[101] S[1] channel 12 not found
+G[101] S[0] channel 7 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 1979160641976017887, Value: , Operator: Get
+G[101] S[0] channel 8 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 1979160641976017888, Value: , Operator: Get
+G[101] S[0] channel 9 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 1979160641976017889, Value: , Operator: Get
+G[101] S[0] channel 10 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 4452724392049649705, Value: , Operator: Get
+G[101] S[0] channel 11 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2692663348445256897, Value: , Operator: Get
+G[101] S[0] channel 12 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2976389657623161418, Value: , Operator: Get
+G[101] S[0] channel 13 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2976389657623161418, Value: , Operator: Get
+G[101] S[1] channel 13 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1979160641976017895, Value: , Operator: Get
+G[101] S[2] wake on channel 14
+G[101] S[2] Response for Get from C[3105487256500976839] seq[1979160641976017895]: Err: OK, Value: TEOWp-3EAlMTBmQ_gIOI
+C[3105487256500976839]'s Get seq[1979160641976017895] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017896], key: 3
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017896], key: 3
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017896], key: 3
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1979160641976017895, Value: , Operator: Get
+G[101] S[0] channel 14 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 1979160641976017896, Value: , Operator: Get
+G[101] S[2] wake on channel 15
+G[101] S[2] Response for Get from C[3105487256500976839] seq[1979160641976017896]: Err: OK, Value: BbkHFj6wwL5KUSquhB1v
+C[3105487256500976839]'s Get seq[1979160641976017896] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017897], key: 4
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 1979160641976017895, Value: , Operator: Get
+G[101] S[1] channel 14 not found
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017897], key: 4
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017897], key: 4
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 1979160641976017896, Value: , Operator: Get
+G[101] S[0] channel 15 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 1979160641976017896, Value: , Operator: Get
+G[101] S[1] channel 15 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017897, Value: , Operator: Get
+G[101] S[2] wake on channel 16
+G[101] S[2] Response for Get from C[3105487256500976839] seq[1979160641976017897]: Err: OK, Value: smLJVRo_F0xeLUMWrO9U
+C[3105487256500976839]'s Get seq[1979160641976017897] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017898], key: 5
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017898], key: 5
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017898], key: 5
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017897, Value: , Operator: Get
+G[101] S[1] channel 16 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 1979160641976017897, Value: , Operator: Get
+G[101] S[0] channel 16 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017898, Value: , Operator: Get
+G[101] S[2] wake on channel 17
+G[101] S[2] Response for Get from C[3105487256500976839] seq[1979160641976017898]: Err: OK, Value: hsca53LqwXUTM2i-4_j8
+C[3105487256500976839]'s Get seq[1979160641976017898] receive [OK]
+G[101] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017899], key: 6
+G[101] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017899], key: 6
+G[101] S[2] receive Get RPC from C[3105487256500976839], seq[1979160641976017899], key: 6
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017898, Value: , Operator: Get
+G[101] S[0] channel 17 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 1979160641976017898, Value: , Operator: Get
+G[101] S[1] channel 17 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017899, Value: , Operator: Get
+G[101] S[2] wake on channel 18
+G[101] S[2] Response for Get from C[3105487256500976839] seq[1979160641976017899]: Err: OK, Value: gZCtif6PcomJR1CgIu7Y
+C[3105487256500976839]'s Get seq[1979160641976017899] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017900], key: 7
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017900], key: 7
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017900, Value: , Operator: Get
+G[100] S[1] wake on channel 18
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017900]: Err: OK, Value: ols32P9X-uEijpBio3Rl
+C[3105487256500976839]'s Get seq[1979160641976017900] receive [OK]
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017901], key: 8
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017901], key: 8
+G[101] S[0] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017900, Value: , Operator: Get
+G[100] S[0] channel 18 not found
+G[101] S[1] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017900, Value: , Operator: Get
+G[100] S[2] channel 18 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 1979160641976017901, Value: , Operator: Get
+G[100] S[1] wake on channel 19
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017901]: Err: OK, Value: 3f6ecKirRpam5deSQXrj
+C[3105487256500976839]'s Get seq[1979160641976017901] receive [OK]
+G[101] S[2] receive Get RPC from C[4463892178324007733], seq[3464568767695610777], key: 3
+G[100] S[0] receive Get RPC from C[3105487256500976839], seq[1979160641976017902], key: 9
+G[100] S[1] receive Get RPC from C[3105487256500976839], seq[1979160641976017902], key: 9
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017899, Value: , Operator: Get
+G[101] S[0] channel 18 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 1979160641976017899, Value: , Operator: Get
+G[101] S[1] channel 18 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 3464568767695610777, Value: , Operator: Get
+G[101] S[2] wake on channel 19
+G[101] S[2] Response for Get from C[4463892178324007733] seq[3464568767695610777]: Err: OK, Value: BbkHFj6wwL5KUSquhB1v
+C[4463892178324007733]'s Get seq[3464568767695610777] receive [OK]
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 1979160641976017901, Value: , Operator: Get
+G[100] S[0] channel 19 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 1979160641976017902, Value: , Operator: Get
+G[100] S[1] wake on channel 20
+G[100] S[1] Response for Get from C[3105487256500976839] seq[1979160641976017902]: Err: OK, Value: OyqPgycjo8jfDtSfhCk3
+C[3105487256500976839]'s Get seq[1979160641976017902] receive [OK]
+  ... Passed
+Test: join then leave ...
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389302], key: 0, value: rs_Qp
+Seq[2085916280377389302] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389302], key: 0, value: rs_Qp
+seq[2085916280377389302] start
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 2085916280377389302, Value: rs_Qp, Operator: Put
+G[100] S[1] wake on channel 1
+S[1] wake on channel 1
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389302]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389302] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389303], key: 1, value: UJtWH
+Seq[2085916280377389303] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389303], key: 1, value: UJtWH
+seq[2085916280377389303] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 2085916280377389302, Value: rs_Qp, Operator: Put
+G[100] S[0] channel 1 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 2085916280377389302, Value: rs_Qp, Operator: Put
+G[100] S[2] channel 1 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389303, Value: UJtWH, Operator: Put
+G[100] S[1] wake on channel 2
+S[1] wake on channel 2
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389303]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389303] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389304], key: 2, value: zU1Xy
+Seq[2085916280377389304] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389304], key: 2, value: zU1Xy
+seq[2085916280377389304] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389303, Value: UJtWH, Operator: Put
+G[100] S[2] channel 2 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389303, Value: UJtWH, Operator: Put
+G[100] S[0] channel 2 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389304, Value: zU1Xy, Operator: Put
+G[100] S[1] wake on channel 3
+S[1] wake on channel 3
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389304]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389304] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389305], key: 3, value: 018ni
+Seq[2085916280377389305] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389305], key: 3, value: 018ni
+seq[2085916280377389305] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389304, Value: zU1Xy, Operator: Put
+G[100] S[2] channel 3 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389304, Value: zU1Xy, Operator: Put
+G[100] S[0] channel 3 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389305, Value: 018ni, Operator: Put
+G[100] S[1] wake on channel 4
+S[1] wake on channel 4
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389305]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389305] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389306], key: 4, value: Kv92I
+Seq[2085916280377389306] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389306], key: 4, value: Kv92I
+seq[2085916280377389306] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389305, Value: 018ni, Operator: Put
+G[100] S[0] channel 4 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389306, Value: Kv92I, Operator: Put
+G[100] S[1] wake on channel 5
+S[1] wake on channel 5
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389306]: OK
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389305, Value: 018ni, Operator: Put
+G[100] S[2] channel 4 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389306] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389307], key: 5, value: MI4oK
+Seq[2085916280377389307] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389307], key: 5, value: MI4oK
+seq[2085916280377389307] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389306, Value: Kv92I, Operator: Put
+G[100] S[2] channel 5 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389306, Value: Kv92I, Operator: Put
+G[100] S[0] channel 5 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389307, Value: MI4oK, Operator: Put
+G[100] S[1] wake on channel 6
+S[1] wake on channel 6
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389307]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389307] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389308], key: 6, value: 2Qj7w
+Seq[2085916280377389308] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389308], key: 6, value: 2Qj7w
+seq[2085916280377389308] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389307, Value: MI4oK, Operator: Put
+G[100] S[0] channel 6 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389307, Value: MI4oK, Operator: Put
+G[100] S[2] channel 6 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389308, Value: 2Qj7w, Operator: Put
+G[100] S[1] wake on channel 7
+S[1] wake on channel 7
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389308]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389308] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389309], key: 7, value: jGtkr
+Seq[2085916280377389309] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389309], key: 7, value: jGtkr
+seq[2085916280377389309] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389308, Value: 2Qj7w, Operator: Put
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389308, Value: 2Qj7w, Operator: Put
+G[100] S[0] channel 7 not found
+G[100] S[2] channel 7 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389309, Value: jGtkr, Operator: Put
+G[100] S[1] wake on channel 8
+S[1] wake on channel 8
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389309]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389309] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389310], key: 8, value: F-VMm
+Seq[2085916280377389310] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389310], key: 8, value: F-VMm
+seq[2085916280377389310] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389309, Value: jGtkr, Operator: Put
+G[100] S[0] channel 8 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389309, Value: jGtkr, Operator: Put
+G[100] S[2] channel 8 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389310, Value: F-VMm, Operator: Put
+G[100] S[1] wake on channel 9
+S[1] wake on channel 9
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389310]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389310] receive OK
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389311], key: 9, value: _uU1V
+Seq[2085916280377389311] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389311], key: 9, value: _uU1V
+seq[2085916280377389311] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389310, Value: F-VMm, Operator: Put
+G[100] S[2] channel 9 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389310, Value: F-VMm, Operator: Put
+G[100] S[0] channel 9 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389311, Value: _uU1V, Operator: Put
+G[100] S[1] wake on channel 10
+S[1] wake on channel 10
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389311]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389311] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389312], key: 0
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389312], key: 0
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389311, Value: _uU1V, Operator: Put
+G[100] S[2] channel 10 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389311, Value: _uU1V, Operator: Put
+G[100] S[0] channel 10 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389312, Value: , Operator: Get
+G[100] S[1] wake on channel 11
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389312]: Err: OK, Value: rs_Qp
+C[356601611523914565]'s Get seq[2085916280377389312] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389313], key: 1
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389313], key: 1
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389312, Value: , Operator: Get
+G[100] S[2] channel 11 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389312, Value: , Operator: Get
+G[100] S[0] channel 11 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389313, Value: , Operator: Get
+G[100] S[1] wake on channel 12
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389313]: Err: OK, Value: UJtWH
+C[356601611523914565]'s Get seq[2085916280377389313] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389314], key: 2
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389314], key: 2
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389313, Value: , Operator: Get
+G[100] S[2] channel 12 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389313, Value: , Operator: Get
+G[100] S[0] channel 12 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389314, Value: , Operator: Get
+G[100] S[1] wake on channel 13
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389314]: Err: OK, Value: zU1Xy
+C[356601611523914565]'s Get seq[2085916280377389314] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389315], key: 3
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389314, Value: , Operator: Get
+G[100] S[0] channel 13 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389314, Value: , Operator: Get
+G[100] S[2] channel 13 not found
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389315], key: 3
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389315, Value: , Operator: Get
+G[100] S[1] wake on channel 14
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389315]: Err: OK, Value: 018ni
+C[356601611523914565]'s Get seq[2085916280377389315] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389316], key: 4
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389316], key: 4
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389315, Value: , Operator: Get
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389315, Value: , Operator: Get
+G[100] S[0] channel 14 not found
+G[100] S[2] channel 14 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389316, Value: , Operator: Get
+G[100] S[1] wake on channel 15
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389316]: Err: OK, Value: Kv92I
+C[356601611523914565]'s Get seq[2085916280377389316] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389317], key: 5
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389317], key: 5
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389316, Value: , Operator: Get
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389316, Value: , Operator: Get
+G[100] S[0] channel 15 not found
+G[100] S[2] channel 15 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389317, Value: , Operator: Get
+G[100] S[1] wake on channel 16
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389317]: Err: OK, Value: MI4oK
+C[356601611523914565]'s Get seq[2085916280377389317] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389318], key: 6
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389318], key: 6
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389317, Value: , Operator: Get
+G[100] S[2] channel 16 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389317, Value: , Operator: Get
+G[100] S[0] channel 16 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 2085916280377389318, Value: , Operator: Get
+G[100] S[1] wake on channel 17
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389318]: Err: OK, Value: 2Qj7w
+C[356601611523914565]'s Get seq[2085916280377389318] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389319], key: 7
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389319], key: 7
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 2085916280377389318, Value: , Operator: Get
+G[100] S[0] channel 17 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389319, Value: , Operator: Get
+G[100] S[1] wake on channel 18
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389319]: Err: OK, Value: jGtkr
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 2085916280377389318, Value: , Operator: Get
+G[100] S[2] channel 17 not found
+C[356601611523914565]'s Get seq[2085916280377389319] receive [OK]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389320], key: 8
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389320], key: 8
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389319, Value: , Operator: Get
+G[100] S[0] channel 18 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389320, Value: , Operator: Get
+G[100] S[1] wake on channel 19
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389320]: Err: OK, Value: F-VMm
+C[356601611523914565]'s Get seq[2085916280377389320] receive [OK]
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389319, Value: , Operator: Get
+G[100] S[2] channel 18 not found
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389321], key: 9
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389321], key: 9
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389320, Value: , Operator: Get
+G[100] S[0] channel 19 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389320, Value: , Operator: Get
+G[100] S[2] channel 19 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389321, Value: , Operator: Get
+G[100] S[1] wake on channel 20
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389321]: Err: OK, Value: _uU1V
+C[356601611523914565]'s Get seq[2085916280377389321] receive [OK]
+START JOIN
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389322], key: 0
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389322], key: 0
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389321, Value: , Operator: Get
+G[100] S[0] channel 20 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389322, Value: , Operator: Get
+G[100] S[1] wake on channel 21
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389322]: Err: OK, Value: rs_Qp
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389321, Value: , Operator: Get
+G[100] S[2] channel 20 not found
+C[356601611523914565]'s Get seq[2085916280377389322] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389323], key: 0, value: yArxB
+Seq[2085916280377389323] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389323], key: 0, value: yArxB
+seq[2085916280377389323] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389322, Value: , Operator: Get
+G[100] S[2] channel 21 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389323, Value: yArxB, Operator: Append
+G[100] S[1] wake on channel 22
+S[1] wake on channel 22
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389323]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389323] receive OK
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389322, Value: , Operator: Get
+G[100] S[0] channel 21 not found
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389324], key: 1
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389324], key: 1
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389323, Value: yArxB, Operator: Append
+G[100] S[2] channel 22 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389323, Value: yArxB, Operator: Append
+G[100] S[0] channel 22 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389324, Value: , Operator: Get
+G[100] S[1] wake on channel 23
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389324]: Err: OK, Value: UJtWH
+C[356601611523914565]'s Get seq[2085916280377389324] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389325], key: 1, value: kdHSj
+Seq[2085916280377389325] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389325], key: 1, value: kdHSj
+seq[2085916280377389325] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389324, Value: , Operator: Get
+G[100] S[0] channel 23 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389325, Value: kdHSj, Operator: Append
+G[100] S[1] wake on channel 24
+S[1] wake on channel 24
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389325]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389325] receive OK
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389324, Value: , Operator: Get
+G[100] S[2] channel 23 not found
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389326], key: 2
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389326], key: 2
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389325, Value: kdHSj, Operator: Append
+G[100] S[0] channel 24 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389325, Value: kdHSj, Operator: Append
+G[100] S[2] channel 24 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389326, Value: , Operator: Get
+G[100] S[1] wake on channel 25
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389326]: Err: OK, Value: zU1Xy
+C[356601611523914565]'s Get seq[2085916280377389326] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389327], key: 2, value: 9KfCI
+Seq[2085916280377389327] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389327], key: 2, value: 9KfCI
+seq[2085916280377389327] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389326, Value: , Operator: Get
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389326, Value: , Operator: Get
+G[100] S[0] channel 25 not found
+G[100] S[2] channel 25 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389327, Value: 9KfCI, Operator: Append
+G[100] S[1] wake on channel 26
+S[1] wake on channel 26
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389327]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389327] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389328], key: 3
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389328], key: 3
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389327, Value: 9KfCI, Operator: Append
+G[100] S[0] channel 26 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389327, Value: 9KfCI, Operator: Append
+G[100] S[2] channel 26 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389328, Value: , Operator: Get
+G[100] S[1] wake on channel 27
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389328]: Err: OK, Value: 018ni
+C[356601611523914565]'s Get seq[2085916280377389328] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389329], key: 3, value: nQLIV
+Seq[2085916280377389329] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389329], key: 3, value: nQLIV
+seq[2085916280377389329] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389328, Value: , Operator: Get
+G[100] S[2] channel 27 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389328, Value: , Operator: Get
+G[100] S[0] channel 27 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389329, Value: nQLIV, Operator: Append
+G[100] S[1] wake on channel 28
+S[1] wake on channel 28
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389329]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389329] receive OK
+G[101] S[0] set migrating
+newconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {1 [100 100 100 100 100 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2]]}
+G[101]'s KV2Migrate: map[]
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389330], key: 4
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389330], key: 4
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389329, Value: nQLIV, Operator: Append
+G[100] S[2] channel 28 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389329, Value: nQLIV, Operator: Append
+G[100] S[0] channel 28 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389330, Value: , Operator: Get
+G[100] S[1] wake on channel 29
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389330]: Err: OK, Value: Kv92I
+G[102] S[1] set migrating
+newconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {1 [100 100 100 100 100 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2]]}
+G[102]'s KV2Migrate: map[]
+C[356601611523914565]'s Get seq[2085916280377389330] receive [OK]
+G[100] S[1] set migrating
+newconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {1 [100 100 100 100 100 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2]]}
+G[100] S[1]: 
+3, 018ninQLIV, Gid: 101
+G[100] S[1]: 
+4, Kv92I, Gid: 101
+G[100] S[1]: 
+5, MI4oK, Gid: 101
+G[100] S[1]: 
+8, F-VMm, Gid: 100
+G[100] S[1]: 
+9, _uU1V, Gid: 100
+G[100] S[1]: 
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389331], key: 4, value: VzV3S
+Seq[2085916280377389331] ErrWrongLeader
+1, UJtWHkdHSj, Gid: 100
+G[100] S[1]: 
+2, zU1Xy9KfCI, Gid: 101
+G[100] S[1]: 
+7, jGtkr, Gid: 100
+G[100] S[1]: 
+0, rs_QpyArxB, Gid: 100
+G[100] S[1]: 
+6, 2Qj7w, Gid: 101
+G[100]'s KV2Migrate: map[101:map[2:zU1Xy9KfCI 3:018ninQLIV 4:Kv92I 5:MI4oK 6:2Qj7w]]
+G[100] S[1] sending migration to G[101], seq[631654018048371985], config[1]
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389331], key: 4, value: VzV3S
+Seq[2085916280377389331] ErrWrongGroup
+G[101] S[0] receive Migrate RPC from G[100], seq[631654018048371985], value: map[2:zU1Xy9KfCI 3:018ninQLIV 4:Kv92I 5:MI4oK 6:2Qj7w]
+C[356601611523914565]'s PutAppend seq[2085916280377389331] receive ErrWrongGroup
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 631654018048371985, Value: , Operator: Migrate
+G[101] S[0] wake on channel 1
+G[101] S[0] wake on channel 1, Gid[100]
+map[100:2], true
+Remove migrateIn 100
+G[101] S[0] Response for Migrate from G[100] seq[631654018048371985]: OK
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 631654018048371985, Value: , Operator: Migrate
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 1, SequenceNum: 631654018048371985, Value: , Operator: Migrate
+G[101] S[1] channel 1 not found
+G[101] S[2] channel 1 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389330, Value: , Operator: Get
+G[100] S[0] channel 29 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389330, Value: , Operator: Get
+G[100] S[2] channel 29 not found
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389331], key: 4, value: VzV3S
+seq[2085916280377389331] start
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389331, Value: VzV3S, Operator: Append
+G[101] S[0] wake on channel 2
+S[0] wake on channel 2
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389331]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389331] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389332], key: 5
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389331, Value: VzV3S, Operator: Append
+G[101] S[2] channel 2 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 2, SequenceNum: 2085916280377389331, Value: VzV3S, Operator: Append
+G[101] S[1] channel 2 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389332, Value: , Operator: Get
+G[101] S[0] wake on channel 3
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389332]: Err: OK, Value: MI4oK
+C[356601611523914565]'s Get seq[2085916280377389332] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389333], key: 5, value: 5_3Ap
+seq[2085916280377389333] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389332, Value: , Operator: Get
+G[101] S[1] channel 3 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 3, SequenceNum: 2085916280377389332, Value: , Operator: Get
+G[101] S[2] channel 3 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389333, Value: 5_3Ap, Operator: Append
+G[101] S[0] wake on channel 4
+S[0] wake on channel 4
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389333]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389333] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389334], key: 6
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389333, Value: 5_3Ap, Operator: Append
+G[101] S[2] channel 4 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 4, SequenceNum: 2085916280377389333, Value: 5_3Ap, Operator: Append
+G[101] S[1] channel 4 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389334, Value: , Operator: Get
+G[101] S[0] wake on channel 5
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389334]: Err: OK, Value: 2Qj7w
+C[356601611523914565]'s Get seq[2085916280377389334] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389335], key: 6, value: AtWzV
+seq[2085916280377389335] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389334, Value: , Operator: Get
+G[101] S[2] channel 5 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 5, SequenceNum: 2085916280377389334, Value: , Operator: Get
+G[101] S[1] channel 5 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389335, Value: AtWzV, Operator: Append
+G[101] S[0] wake on channel 6
+S[0] wake on channel 6
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389335]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389335] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389336], key: 7
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389336], key: 7
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389336, Value: , Operator: Get
+G[100] S[1] wake on channel 30
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389336]: Err: OK, Value: jGtkr
+C[356601611523914565]'s Get seq[2085916280377389336] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389337], key: 7, value: 92sqt
+Seq[2085916280377389337] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389337], key: 7, value: 92sqt
+seq[2085916280377389337] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389336, Value: , Operator: Get
+G[100] S[0] channel 30 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389337, Value: 92sqt, Operator: Append
+G[100] S[1] wake on channel 31
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389336, Value: , Operator: Get
+S[1] wake on channel 31
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389337]: OK
+G[100] S[2] channel 30 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389337] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389338], key: 8
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389338], key: 8
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389337, Value: 92sqt, Operator: Append
+G[100] S[2] channel 31 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389337, Value: 92sqt, Operator: Append
+G[100] S[0] channel 31 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 32, SequenceNum: 2085916280377389338, Value: , Operator: Get
+G[100] S[1] wake on channel 32
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389338]: Err: OK, Value: F-VMm
+C[356601611523914565]'s Get seq[2085916280377389338] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389339], key: 8, value: uwCNP
+Seq[2085916280377389339] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389339], key: 8, value: uwCNP
+seq[2085916280377389339] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 32, SequenceNum: 2085916280377389338, Value: , Operator: Get
+G[100] S[2] channel 32 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 33, SequenceNum: 2085916280377389339, Value: uwCNP, Operator: Append
+G[100] S[1] wake on channel 33
+S[1] wake on channel 33
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389339]: OK
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 32, SequenceNum: 2085916280377389338, Value: , Operator: Get
+G[100] S[0] channel 32 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389339] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389340], key: 9
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389335, Value: AtWzV, Operator: Append
+G[101] S[2] channel 6 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 6, SequenceNum: 2085916280377389335, Value: AtWzV, Operator: Append
+G[101] S[1] channel 6 not found
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389340], key: 9
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 33, SequenceNum: 2085916280377389339, Value: uwCNP, Operator: Append
+G[100] S[0] channel 33 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 33, SequenceNum: 2085916280377389339, Value: uwCNP, Operator: Append
+G[100] S[2] channel 33 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 34, SequenceNum: 2085916280377389340, Value: , Operator: Get
+G[100] S[1] wake on channel 34
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389340]: Err: OK, Value: _uU1V
+C[356601611523914565]'s Get seq[2085916280377389340] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389341], key: 9, value: xufAU
+Seq[2085916280377389341] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389341], key: 9, value: xufAU
+seq[2085916280377389341] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 34, SequenceNum: 2085916280377389340, Value: , Operator: Get
+G[100] S[0] channel 34 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 35, SequenceNum: 2085916280377389341, Value: xufAU, Operator: Append
+G[100] S[1] wake on channel 35
+S[1] wake on channel 35
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389341]: OK
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 34, SequenceNum: 2085916280377389340, Value: , Operator: Get
+G[100] S[2] channel 34 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389341] receive OK
+START LEAVE
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389342], key: 0
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389342], key: 0
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 35, SequenceNum: 2085916280377389341, Value: xufAU, Operator: Append
+G[100] S[2] channel 35 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 35, SequenceNum: 2085916280377389341, Value: xufAU, Operator: Append
+G[100] S[0] channel 35 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 36, SequenceNum: 2085916280377389342, Value: , Operator: Get
+G[100] S[1] wake on channel 36
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389342]: Err: OK, Value: rs_QpyArxB
+C[356601611523914565]'s Get seq[2085916280377389342] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389343], key: 0, value: eJm4V
+Seq[2085916280377389343] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389343], key: 0, value: eJm4V
+seq[2085916280377389343] start
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 36, SequenceNum: 2085916280377389342, Value: , Operator: Get
+G[100] S[2] channel 36 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 37, SequenceNum: 2085916280377389343, Value: eJm4V, Operator: Append
+G[100] S[1] wake on channel 37
+S[1] wake on channel 37
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389343]: OK
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 36, SequenceNum: 2085916280377389342, Value: , Operator: Get
+G[100] S[0] channel 36 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389343] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389344], key: 1
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389344], key: 1
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 37, SequenceNum: 2085916280377389343, Value: eJm4V, Operator: Append
+G[100] S[0] channel 37 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 37, SequenceNum: 2085916280377389343, Value: eJm4V, Operator: Append
+G[100] S[2] channel 37 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 38, SequenceNum: 2085916280377389344, Value: , Operator: Get
+G[100] S[1] wake on channel 38
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389344]: Err: OK, Value: UJtWHkdHSj
+C[356601611523914565]'s Get seq[2085916280377389344] receive [OK]
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389345], key: 1, value: etae9
+Seq[2085916280377389345] ErrWrongLeader
+true, ErrWrongLeader
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389345], key: 1, value: etae9
+seq[2085916280377389345] start
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 38, SequenceNum: 2085916280377389344, Value: , Operator: Get
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 38, SequenceNum: 2085916280377389344, Value: , Operator: Get
+G[100] S[2] channel 38 not found
+G[100] S[0] channel 38 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 39, SequenceNum: 2085916280377389345, Value: etae9, Operator: Append
+G[100] S[1] wake on channel 39
+S[1] wake on channel 39
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389345]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389345] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389346], key: 2
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389346, Value: , Operator: Get
+G[101] S[0] wake on channel 7
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389346]: Err: OK, Value: zU1Xy9KfCI
+C[356601611523914565]'s Get seq[2085916280377389346] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389347], key: 2, value: 7HHlE
+seq[2085916280377389347] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389346, Value: , Operator: Get
+G[101] S[2] channel 7 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 7, SequenceNum: 2085916280377389346, Value: , Operator: Get
+G[101] S[1] channel 7 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389347, Value: 7HHlE, Operator: Append
+G[101] S[0] wake on channel 8
+S[0] wake on channel 8
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389347]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389347] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389348], key: 3
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389347, Value: 7HHlE, Operator: Append
+G[101] S[1] channel 8 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 8, SequenceNum: 2085916280377389347, Value: 7HHlE, Operator: Append
+G[101] S[2] channel 8 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389348, Value: , Operator: Get
+G[101] S[0] wake on channel 9
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389348]: Err: OK, Value: 018ninQLIV
+C[356601611523914565]'s Get seq[2085916280377389348] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389349], key: 3, value: ZpbUj
+seq[2085916280377389349] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389348, Value: , Operator: Get
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 9, SequenceNum: 2085916280377389348, Value: , Operator: Get
+G[101] S[2] channel 9 not found
+G[101] S[1] channel 9 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389349, Value: ZpbUj, Operator: Append
+G[101] S[0] wake on channel 10
+S[0] wake on channel 10
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389349]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389349] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389350], key: 4
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389349, Value: ZpbUj, Operator: Append
+G[101] S[1] channel 10 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389350, Value: , Operator: Get
+G[101] S[0] wake on channel 11
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 10, SequenceNum: 2085916280377389349, Value: ZpbUj, Operator: Append
+G[101] S[2] channel 10 not found
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389350]: Err: OK, Value: Kv92IVzV3S
+C[356601611523914565]'s Get seq[2085916280377389350] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389351], key: 4, value: XBMeA
+seq[2085916280377389351] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389350, Value: , Operator: Get
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 11, SequenceNum: 2085916280377389350, Value: , Operator: Get
+G[101] S[1] channel 11 not found
+G[101] S[2] channel 11 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389351, Value: XBMeA, Operator: Append
+G[101] S[0] wake on channel 12
+S[0] wake on channel 12
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389351]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389351] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389352], key: 5
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389351, Value: XBMeA, Operator: Append
+G[101] S[1] channel 12 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 12, SequenceNum: 2085916280377389351, Value: XBMeA, Operator: Append
+G[101] S[2] channel 12 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389352, Value: , Operator: Get
+G[101] S[0] wake on channel 13
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389352]: Err: OK, Value: MI4oK5_3Ap
+C[356601611523914565]'s Get seq[2085916280377389352] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389353], key: 5, value: oc0Ks
+seq[2085916280377389353] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389352, Value: , Operator: Get
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 13, SequenceNum: 2085916280377389352, Value: , Operator: Get
+G[101] S[1] channel 13 not found
+G[101] S[2] channel 13 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389353, Value: oc0Ks, Operator: Append
+G[101] S[0] wake on channel 14
+S[0] wake on channel 14
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389353]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389353] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389354], key: 6
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389353, Value: oc0Ks, Operator: Append
+G[101] S[1] channel 14 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389354, Value: , Operator: Get
+G[101] S[0] wake on channel 15
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389354]: Err: OK, Value: 2Qj7wAtWzV
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 14, SequenceNum: 2085916280377389353, Value: oc0Ks, Operator: Append
+G[101] S[2] channel 14 not found
+C[356601611523914565]'s Get seq[2085916280377389354] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389355], key: 6, value: gq7Yl
+seq[2085916280377389355] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389354, Value: , Operator: Get
+G[101] S[1] channel 15 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 15, SequenceNum: 2085916280377389354, Value: , Operator: Get
+G[101] S[2] channel 15 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389355, Value: gq7Yl, Operator: Append
+G[101] S[0] wake on channel 16
+S[0] wake on channel 16
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389355]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389355] receive OK
+G[100] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389356], key: 7
+G[100] S[1] receive Get RPC from C[356601611523914565], seq[2085916280377389356], key: 7
+G[101] S[0] set migrating
+newconfig: {3 [101 101 101 101 101 101 101 101 101 101] map[101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+G[101] S[0]: 
+6, 2Qj7wAtWzVgq7Yl, Gid: 101
+G[101] S[0]: 
+3, 018ninQLIVZpbUj, Gid: 101
+G[101] S[0]: 
+4, Kv92IVzV3SXBMeA, Gid: 101
+G[101] S[0]: 
+5, MI4oK5_3Apoc0Ks, Gid: 101
+G[101] S[0]: 
+2, zU1Xy9KfCI7HHlE, Gid: 101
+G[101]'s KV2Migrate: map[]
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 40, SequenceNum: 2085916280377389356, Value: , Operator: Get
+G[100] S[1] wake on channel 40
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 39, SequenceNum: 2085916280377389345, Value: etae9, Operator: Append
+G[100] S[0] channel 39 not found
+G[100] S[1] Response for Get from C[356601611523914565] seq[2085916280377389356]: Err: OK, Value: jGtkr92sqt
+C[356601611523914565]'s Get seq[2085916280377389356] receive [OK]
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 39, SequenceNum: 2085916280377389345, Value: etae9, Operator: Append
+G[100] S[2] channel 39 not found
+G[100] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389357], key: 7, value: zYg4u
+Seq[2085916280377389357] ErrWrongLeader
+true, ErrWrongLeader
+G[102] S[1] set migrating
+newconfig: {3 [101 101 101 101 101 101 101 101 101 101] map[101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+G[102]'s KV2Migrate: map[]
+G[100] S[1] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389357], key: 7, value: zYg4u
+seq[2085916280377389357] start
+G[100] S[1] set migrating
+newconfig: {3 [101 101 101 101 101 101 101 101 101 101] map[101:[server-101-0 server-101-1 server-101-2]]}
+oldconfig: {2 [101 101 101 101 101 100 100 100 100 100] map[100:[server-100-0 server-100-1 server-100-2] 101:[server-101-0 server-101-1 server-101-2]]}
+G[100] S[1]: 
+1, UJtWHkdHSjetae9, Gid: 101
+G[100] S[1]: 
+2, zU1Xy9KfCI, Gid: 101
+G[100] S[1]: 
+3, 018ninQLIV, Gid: 101
+G[100] S[1]: 
+4, Kv92I, Gid: 101
+G[100] S[1]: 
+5, MI4oK, Gid: 101
+G[100] S[1]: 
+8, F-VMmuwCNP, Gid: 101
+G[100] S[1]: 
+9, _uU1VxufAU, Gid: 101
+G[100] S[1]: 
+0, rs_QpyArxBeJm4V, Gid: 101
+G[100] S[1]: 
+6, 2Qj7w, Gid: 101
+G[100] S[1]: 
+7, jGtkr92sqt, Gid: 101
+G[100]'s KV2Migrate: map[101:map[0:rs_QpyArxBeJm4V 1:UJtWHkdHSjetae9 7:jGtkr92sqt 8:F-VMmuwCNP 9:_uU1VxufAU]]
+G[100] S[1] sending migration to G[101], seq[631654018048371986], config[2]
+G[101] S[0] receive Migrate RPC from G[100], seq[631654018048371986], value: map[0:rs_QpyArxBeJm4V 1:UJtWHkdHSjetae9 7:jGtkr92sqt 8:F-VMmuwCNP 9:_uU1VxufAU]
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 40, SequenceNum: 2085916280377389356, Value: , Operator: Get
+G[100] S[0] channel 40 not found
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 40, SequenceNum: 2085916280377389356, Value: , Operator: Get
+G[100] S[2] channel 40 not found
+G[100] S[1] applyMsg: isValid: true, CommandIndex: 41, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[100] S[1] wake on channel 41
+S[1] wake on channel 41
+G[100] S[1] Response for PutAppend from C[356601611523914565] seq[2085916280377389357]: ErrWrongGroup
+C[356601611523914565]'s PutAppend seq[2085916280377389357] receive ErrWrongGroup
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389355, Value: gq7Yl, Operator: Append
+G[101] S[1] channel 16 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 16, SequenceNum: 2085916280377389355, Value: gq7Yl, Operator: Append
+G[101] S[2] channel 16 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 631654018048371986, Value: , Operator: Migrate
+G[101] S[0] wake on channel 17
+G[101] S[0] wake on channel 17, Gid[100]
+map[100:3], true
+Remove migrateIn 100
+G[101] S[0] Response for Migrate from G[100] seq[631654018048371986]: OK
+G[100] S[2] applyMsg: isValid: true, CommandIndex: 41, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[100] S[2] channel 41 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 631654018048371986, Value: , Operator: Migrate
+G[101] S[1] channel 17 not found
+G[100] S[0] applyMsg: isValid: true, CommandIndex: 41, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[100] S[0] channel 41 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 17, SequenceNum: 631654018048371986, Value: , Operator: Migrate
+G[101] S[2] channel 17 not found
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389357], key: 7, value: zYg4u
+seq[2085916280377389357] start
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[101] S[0] wake on channel 18
+S[0] wake on channel 18
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389357]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389357] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389358], key: 8
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[101] S[2] channel 18 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 18, SequenceNum: 2085916280377389357, Value: zYg4u, Operator: Append
+G[101] S[1] channel 18 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389358, Value: , Operator: Get
+G[101] S[0] wake on channel 19
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389358]: Err: OK, Value: F-VMmuwCNP
+C[356601611523914565]'s Get seq[2085916280377389358] receive [OK]
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389359], key: 8, value: 36wvy
+seq[2085916280377389359] start
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389358, Value: , Operator: Get
+G[101] S[1] channel 19 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 19, SequenceNum: 2085916280377389358, Value: , Operator: Get
+G[101] S[2] channel 19 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389359, Value: 36wvy, Operator: Append
+G[101] S[0] wake on channel 20
+S[0] wake on channel 20
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389359]: OK
+C[356601611523914565]'s PutAppend seq[2085916280377389359] receive OK
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389360], key: 9
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389359, Value: 36wvy, Operator: Append
+G[101] S[1] channel 20 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389360, Value: , Operator: Get
+G[101] S[0] wake on channel 21
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389360]: Err: OK, Value: _uU1VxufAU
+C[356601611523914565]'s Get seq[2085916280377389360] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 20, SequenceNum: 2085916280377389359, Value: 36wvy, Operator: Append
+G[101] S[2] channel 20 not found
+G[101] S[0] receive PutAppend RPC from C[356601611523914565], seq[2085916280377389361], key: 9, value: 4CFix
+seq[2085916280377389361] start
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389360, Value: , Operator: Get
+G[101] S[2] channel 21 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389361, Value: 4CFix, Operator: Append
+G[101] S[0] wake on channel 22
+S[0] wake on channel 22
+G[101] S[0] Response for PutAppend from C[356601611523914565] seq[2085916280377389361]: OK
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 21, SequenceNum: 2085916280377389360, Value: , Operator: Get
+G[101] S[1] channel 21 not found
+C[356601611523914565]'s PutAppend seq[2085916280377389361] receive OK
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389361, Value: 4CFix, Operator: Append
+G[101] S[1] channel 22 not found
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 22, SequenceNum: 2085916280377389361, Value: 4CFix, Operator: Append
+G[101] S[2] channel 22 not found
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389362], key: 0
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389362, Value: , Operator: Get
+G[101] S[0] wake on channel 23
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389362]: Err: OK, Value: rs_QpyArxBeJm4V
+C[356601611523914565]'s Get seq[2085916280377389362] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389363], key: 1
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389362, Value: , Operator: Get
+G[101] S[2] channel 23 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 23, SequenceNum: 2085916280377389362, Value: , Operator: Get
+G[101] S[1] channel 23 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389363, Value: , Operator: Get
+G[101] S[0] wake on channel 24
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389363]: Err: OK, Value: UJtWHkdHSjetae9
+C[356601611523914565]'s Get seq[2085916280377389363] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389364], key: 2
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389363, Value: , Operator: Get
+G[101] S[2] channel 24 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389364, Value: , Operator: Get
+G[101] S[0] wake on channel 25
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389364]: Err: OK, Value: zU1Xy9KfCI7HHlE
+C[356601611523914565]'s Get seq[2085916280377389364] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389365], key: 3
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 24, SequenceNum: 2085916280377389363, Value: , Operator: Get
+G[101] S[1] channel 24 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389364, Value: , Operator: Get
+G[101] S[1] channel 25 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389365, Value: , Operator: Get
+G[101] S[0] wake on channel 26
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389365]: Err: OK, Value: 018ninQLIVZpbUj
+C[356601611523914565]'s Get seq[2085916280377389365] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 25, SequenceNum: 2085916280377389364, Value: , Operator: Get
+G[101] S[2] channel 25 not found
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389366], key: 4
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389365, Value: , Operator: Get
+G[101] S[2] channel 26 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389366, Value: , Operator: Get
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 26, SequenceNum: 2085916280377389365, Value: , Operator: Get
+G[101] S[1] channel 26 not found
+G[101] S[0] wake on channel 27
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389366]: Err: OK, Value: Kv92IVzV3SXBMeA
+C[356601611523914565]'s Get seq[2085916280377389366] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389367], key: 5
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389366, Value: , Operator: Get
+G[101] S[2] channel 27 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 27, SequenceNum: 2085916280377389366, Value: , Operator: Get
+G[101] S[1] channel 27 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389367, Value: , Operator: Get
+G[101] S[0] wake on channel 28
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389367]: Err: OK, Value: MI4oK5_3Apoc0Ks
+C[356601611523914565]'s Get seq[2085916280377389367] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389368], key: 6
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389367, Value: , Operator: Get
+G[101] S[2] channel 28 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 28, SequenceNum: 2085916280377389367, Value: , Operator: Get
+G[101] S[1] channel 28 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389368, Value: , Operator: Get
+G[101] S[0] wake on channel 29
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389368]: Err: OK, Value: 2Qj7wAtWzVgq7Yl
+C[356601611523914565]'s Get seq[2085916280377389368] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389369], key: 7
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389368, Value: , Operator: Get
+G[101] S[1] channel 29 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389369, Value: , Operator: Get
+G[101] S[0] wake on channel 30
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389369]: Err: OK, Value: jGtkr92sqtzYg4u
+C[356601611523914565]'s Get seq[2085916280377389369] receive [OK]
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 29, SequenceNum: 2085916280377389368, Value: , Operator: Get
+G[101] S[2] channel 29 not found
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389370], key: 8
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389369, Value: , Operator: Get
+G[101] S[2] channel 30 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 30, SequenceNum: 2085916280377389369, Value: , Operator: Get
+G[101] S[1] channel 30 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389370, Value: , Operator: Get
+G[101] S[0] wake on channel 31
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389370]: Err: OK, Value: F-VMmuwCNP36wvy
+C[356601611523914565]'s Get seq[2085916280377389370] receive [OK]
+G[101] S[0] receive Get RPC from C[356601611523914565], seq[2085916280377389371], key: 9
+G[101] S[2] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389370, Value: , Operator: Get
+G[101] S[2] channel 31 not found
+G[101] S[1] applyMsg: isValid: true, CommandIndex: 31, SequenceNum: 2085916280377389370, Value: , Operator: Get
+G[101] S[1] channel 31 not found
+G[101] S[0] applyMsg: isValid: true, CommandIndex: 32, SequenceNum: 2085916280377389371, Value: , Operator: Get
+G[101] S[0] wake on channel 32
+G[101] S[0] Response for Get from C[356601611523914565] seq[2085916280377389371]: Err: OK, Value: _uU1VxufAU4CFix
+C[356601611523914565]'s Get seq[2085916280377389371] receive [OK]
+  ... Passed
+PASS
+ok  	6.824/shardkv	4.574s
